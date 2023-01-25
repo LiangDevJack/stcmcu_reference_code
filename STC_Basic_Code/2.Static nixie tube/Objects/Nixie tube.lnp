@@ -1,0 +1,4 @@
+".\Objects\main.obj",
+".\Objects\Practice Assignment.obj" 
+TO ".\Objects\Nixie tube" 
+PRINT(".\Listings\Nixie tube.m51") RAMSIZE(256) 

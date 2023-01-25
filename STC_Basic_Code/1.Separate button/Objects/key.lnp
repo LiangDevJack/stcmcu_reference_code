@@ -1,0 +1,4 @@
+".\Objects\main.obj",
+".\Objects\Practice Assignment.obj" 
+TO ".\Objects\key" 
+PRINT(".\Listings\key.m51") RAMSIZE(256) 

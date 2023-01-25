@@ -1,0 +1,392 @@
+C51 COMPILER V9.59.0.0   PRACTICE_ASSIGNMENT                                               08/19/2021 21:50:13 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE PRACTICE_ASSIGNMENT
+OBJECT MODULE PLACED IN .\Objects\Practice Assignment.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Practice Assignment.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(
+                    -.\Listings\Practice Assignment.lst) TABS(2) OBJECT(.\Objects\Practice Assignment.obj)
+
+line level    source
+
+   1          //实践一
+   2          /*#include<STC15F2K60S2.H>
+   3          
+   4          void Delayms (int ms);
+   5          void S4 (void);
+   6          void S5 (void);
+   7          void S6 (void);
+   8          void S7 (void);
+   9          void main(void)
+  10          {
+  11            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+  12          
+  13            while(1)
+  14            {
+  15              S4();
+  16              S5();
+  17              S6();
+  18              S7();
+  19            }
+  20          }
+  21          void S4 (void)
+  22          {
+  23            if(P33==0)
+  24            {
+  25              Delayms(5);
+  26              if(P33==0)
+  27              {
+  28                P0=0X00;
+  29              }
+  30              while(!P33);
+  31              Delayms(100);
+  32            }
+  33          }
+  34          void S5 (void)
+  35          {
+  36              if(P32==0)
+  37            {
+  38              Delayms(5);
+  39              if(P32==0)
+  40              {
+  41                P0=0XFF;
+  42              }
+  43              while(!P32);
+  44              Delayms(100);
+  45            }
+  46          }
+  47          void S6 (void)
+  48          {
+  49              if(P31==0)
+  50            {
+  51              Delayms(5);
+  52              if(P31==0)
+  53              {
+  54                P0=0X55;
+C51 COMPILER V9.59.0.0   PRACTICE_ASSIGNMENT                                               08/19/2021 21:50:13 PAGE 2   
+
+  55              }
+  56              while(!P31);
+  57              Delayms(100);
+  58            }
+  59          }
+  60          void S7 (void)
+  61          {
+  62              if(P30==0)
+  63            {
+  64              Delayms(5);
+  65              if(P30==0)
+  66              {
+  67                P0=0XAA;
+  68              }
+  69              while(!P30);
+  70              Delayms(100);
+  71            }
+  72          }
+  73          
+  74          void Delayms (int ms)
+  75          {
+  76            int i,j;
+  77            for(i=0;i<ms;i++)
+  78              for(j=845;j>0;j--);
+  79          }
+  80          */
+  81          //实践二
+  82          /*#include<STC15F2K60S2.H>
+  83          
+  84          void Delayms (int ms);
+  85          void main (main)
+  86          {
+  87            P2=0XA0;P0=0X00;
+  88            P2=0XC0;P0=0XFF;
+  89            P2=0XFF;P0=0XFF;
+  90            while(1)
+  91            {
+  92              P0=0XC0;//0
+  93              Delayms(1000);
+  94              P0=0XF9;//1
+  95              Delayms(1000);
+  96              P0=0X88;//A
+  97              Delayms(1000);
+  98              P0=0X83;//b
+  99              Delayms(1000);
+ 100              P0=0XA7;//c
+ 101              Delayms(1000);
+ 102              P0=0XA1;//d
+ 103              Delayms(1000);
+ 104              P0=0X86;//E
+ 105              Delayms(1000);
+ 106              P0=0X8E;//F
+ 107              Delayms(1000);
+ 108              P0=0XC7;//L
+ 109              Delayms(1000);
+ 110            }
+ 111          }
+ 112          void Delayms (int ms)
+ 113          {
+ 114            int i,j;
+ 115            for(i=0;i<ms;i++)
+ 116              for(j=845;j>0;j--);
+C51 COMPILER V9.59.0.0   PRACTICE_ASSIGNMENT                                               08/19/2021 21:50:13 PAGE 3   
+
+ 117          }
+ 118          */
+ 119          //实践三
+ 120          /*#include<STC15F2K60S2.H>
+ 121          unsigned char tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90};
+ 122          unsigned int num=9;
+ 123          void Delayms (int ms);
+ 124          void main(void)
+ 125          {
+ 126            P2=0XA0;P0=0X00;
+ 127            P2=0XC0;P0=0XFF;
+ 128            P2=0XFF;P0=0XFF;
+ 129            while(1)
+ 130            {
+ 131                  
+ 132              P0=tap[num];
+ 133              Delayms(1000);
+ 134              num--;
+ 135              while(!num);
+ 136              //if(num==0)break;
+ 137            }
+ 138            while(!num);
+ 139            P2=0XC0;P0=0X00;
+ 140            P0=0X80;P0=0XFE;
+ 141          //  for(num=9;num<0;num--)//不懂
+ 142          //  {
+ 143          //    P0=tap[num];
+ 144          //    Delayms(1000);
+ 145          //  }
+ 146            
+ 147            
+ 148          }
+ 149          
+ 150          void Delayms (int ms)
+ 151          {
+ 152            int i,j;
+ 153            for(i=0;i<ms;i++)
+ 154              for(j=845;j>0;j--);
+ 155          }
+ 156          */
+ 157          //实践四
+ 158          /*#include<STC15F2K60S2.H>
+ 159          unsigned char tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,0X88,0X80,0XC6,0XC0,0X86,0X8E};
+ 160          #define uchar unsigned char 
+ 161          uchar num;
+ 162          void key_scanf16(void);
+ 163          void Delayms (int ms);
+ 164          void main (void)
+ 165          {
+ 166            P2=0XA0;P0=0X00;
+ 167            P2=0XC0;P0=0XFF;
+ 168            P2=0XFF;P0=0XFF;
+ 169            while(1)
+ 170            {
+ 171              P0=tap[num];
+ 172              key_scanf16();
+ 173            }
+ 174          }
+ 175          void key_scanf16(void)
+ 176          {
+ 177            uchar temp;
+ 178            P44=0;P42=1;P3=0X7F;//0111 1111
+C51 COMPILER V9.59.0.0   PRACTICE_ASSIGNMENT                                               08/19/2021 21:50:13 PAGE 4   
+
+ 179            temp=P3;
+ 180            temp=temp&0X0F;
+ 181            if(temp!=0X0F)
+ 182            { 
+ 183              Delayms(5);
+ 184              temp=P3;
+ 185              temp=temp&0X0F;
+ 186              if(temp!=0X0F)
+ 187              {
+ 188                temp=P3;
+ 189                switch(temp)
+ 190                {
+ 191                  case 0X7E:num=0;break;
+ 192                  case 0X7D:num=1;break;
+ 193                  case 0X7B:num=2;break;
+ 194                  case 0X77:num=3;break;
+ 195                }
+ 196                while(temp!=0X0F)
+ 197                {
+ 198                  temp=P3;
+ 199                  temp=temp&0X0F;
+ 200                }
+ 201              }
+ 202            }
+ 203          
+ 204            P44=1;P42=0;P3=0XBF;//1011 1111
+ 205            temp=P3;
+ 206            temp=temp&0X0F;
+ 207            if(temp!=0X0F)
+ 208            { 
+ 209              Delayms(5);
+ 210              temp=P3;
+ 211              temp=temp&0X0F;
+ 212              if(temp!=0X0F)
+ 213              {
+ 214                temp=P3;
+ 215                switch(temp)
+ 216                {
+ 217                  case 0XBE:num=4;break;
+ 218                  case 0XBD:num=5;break;
+ 219                  case 0XBB:num=6;break;
+ 220                  case 0XB7:num=7;break;
+ 221                }
+ 222                while(temp!=0X0F)
+ 223                {
+ 224                  temp=P3;
+ 225                  temp=temp&0X0F;
+ 226                }
+ 227              }
+ 228            }
+ 229            
+ 230            P44=1;P42=1;P3=0XDF;//1101 1111
+ 231            temp=P3;
+ 232            temp=temp&0X0F;
+ 233            if(temp!=0X0F)
+ 234            { 
+ 235              Delayms(5);
+ 236              temp=P3;
+ 237              temp=temp&0X0F;
+ 238              if(temp!=0X0F)
+ 239              {
+ 240                temp=P3;
+C51 COMPILER V9.59.0.0   PRACTICE_ASSIGNMENT                                               08/19/2021 21:50:13 PAGE 5   
+
+ 241                switch(temp)
+ 242                {
+ 243                  case 0XDE:num=8;break;
+ 244                  case 0XDD:num=9;break;
+ 245                  case 0XDB:num=10;break;
+ 246                  case 0XD7:num=11;break;
+ 247                }
+ 248                while(temp!=0X0F)
+ 249                {
+ 250                  temp=P3;
+ 251                  temp=temp&0X0F;
+ 252                }
+ 253              }
+ 254            }
+ 255            
+ 256            P44=1;P42=1;P3=0XEF;//0111 1111
+ 257            temp=P3;
+ 258            temp=temp&0X0F;
+ 259            if(temp!=0X0F)
+ 260            { 
+ 261              Delayms(5);
+ 262              temp=P3;
+ 263              temp=temp&0X0F;
+ 264              if(temp!=0X0F)
+ 265              {
+ 266                temp=P3;
+ 267                switch(temp)
+ 268                {
+ 269                  case 0XEE:num=12;break;
+ 270                  case 0XED:num=13;break;
+ 271                  case 0XEB:num=14;break;
+ 272                  case 0XE7:num=15;break;
+ 273                }
+ 274                while(temp!=0X0F)
+ 275                {
+ 276                  temp=P3;
+ 277                  temp=temp&0X0F;
+ 278                }
+ 279              }
+ 280            }
+ 281          }
+ 282          void Delayms (int ms)
+ 283          {
+ 284            int i,j;
+ 285            for(i=0;i<ms;i++)
+ 286              for(j=845;j>0;j--);
+ 287          }
+ 288          */
+ 289          
+ 290          /*#include<STC15F2K60S2.H>
+ 291          unsigned char tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90};
+ 292          unsigned char num=99;
+ 293          unsigned int i;
+ 294          unsigned int one,two;
+ 295          void display1(one,two);
+ 296          void Delayms (int ms);
+ 297          void main(void)
+ 298          {
+ 299            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 300              while(1)
+ 301              {
+ 302                i++;
+C51 COMPILER V9.59.0.0   PRACTICE_ASSIGNMENT                                               08/19/2021 21:50:13 PAGE 6   
+
+ 303                if(i==500)
+ 304                {
+ 305                  i=0;
+ 306                  num--;
+ 307                } 
+ 308                
+ 309                one=num/10;
+ 310                two=num%10;
+ 311                display1(one,two);
+ 312            
+ 313              }
+ 314              
+ 315          //    one=num/10;
+ 316          //    two=num%10;
+ 317          //    for(num;num<0;num--)
+ 318          //    {
+ 319          //      display1(one,two);
+ 320          //      
+ 321          //      Delayms(1000);
+ 322          //    }
+ 323          //    while(1);
+ 324            
+ 325          }
+ 326          
+ 327          void display1(one,two)
+ 328          {
+ 329            P2=0XC0;
+ 330            P0=0X01;
+ 331            P2=0XFF;
+ 332            P0=tap[one];
+ 333            Delayms(1);
+ 334            
+ 335            P2=0XC0;
+ 336            P0=0X02;
+ 337            P2=0XFF;
+ 338            P0=tap[two];
+ 339            Delayms(1);
+ 340          }
+ 341          void Delayms (int ms)
+ 342          {
+ 343            int i,j;
+ 344            for(i=0;i<ms;i++)
+ 345              for(j=845;j>0;j--);
+ 346          }
+ 347          
+ 348          */
+ 349          
+ 350          
+ 351          
+ 352          
+ 353          
+ 354          
+ 355          
+ 356          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+C51 COMPILER V9.59.0.0   PRACTICE_ASSIGNMENT                                               08/19/2021 21:50:13 PAGE 7   
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

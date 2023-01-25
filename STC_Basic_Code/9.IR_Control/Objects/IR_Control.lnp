@@ -1,0 +1,4 @@
+".\Objects\main.obj",
+".\Objects\Text.obj" 
+TO ".\Objects\IR_Control" 
+PRINT(".\Listings\IR_Control.m51") RAMSIZE(256) 

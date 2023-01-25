@@ -1,0 +1,299 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              01/23/2022 16:30:31 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          /*流水灯点亮程序*/
+   2          /*#include<STC15F2K60S2.H>
+   3          
+   4          void main (void)
+   5          {
+   6            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;//初始化程序 
+   7          
+   8            P00=0;
+   9            while(1); 
+  10          } */
+  11          
+  12          /*LED灯闪烁程序*/
+  13          /*#include<STC15F2K60S2.H>
+  14            unsigned int i;
+  15           
+  16          void main (void)
+  17          {
+  18            P2=0XA0;P0=0X80;P2=0X80;P0=0XFF;//初始化程序
+  19            
+  20            while(1)
+  21              { P00=0;
+  22                for(i=0;i<65535;i++);
+  23                P01=1;
+  24                for(i=0;i<65535;i++);
+  25              }
+  26          } */
+  27          
+  28          
+  29          /*#include<STC15F2K60S2.H>
+  30            unsigned int i;
+  31            
+  32          void main (void)
+  33          {
+  34            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;//初始化程序
+  35            
+  36            while(1)
+  37            {
+  38              P00=0;
+  39              for(i=0;i<65535;i++);
+  40              P00=1;
+  41              P01=0;
+  42              for(i=0;i<65535;i++);
+  43              P02=1;
+  44              P03=0;
+  45              for(i=0;i<65535;i++);
+  46              P03=1;
+  47              P04=0;
+  48              for(i=0;i<65535;i++);
+  49              P04=1;
+  50              P05=0;
+  51              for(i=0;i<65535;i++);
+  52              P05=1;
+  53              P06=0;
+  54              for(i=0;i<65535;i++);
+C51 COMPILER V9.60.0.0   MAIN                                                              01/23/2022 16:30:31 PAGE 2   
+
+  55              P06=1;
+  56              P07=0;
+  57              for(i=0;i<65535;i++);
+  58              P07=1;
+  59            }
+  60          }
+  61          */
+  62            
+  63            
+  64          //简易流水灯
+  65          /*#include<STC15F2K60S2.H>
+  66            unsigned int i;
+  67              
+  68          void main (void)
+  69          {
+  70            P2=0XA0;P0=0X80;P2=0X80;P0=0XFF;//初始化程序
+  71            
+  72            P0=0XFE;          //1111 1110
+  73            while(1);
+  74          }*/
+  75          
+  76          /*#include<STC15F2K60S2.H>
+  77            unsigned int i;
+  78            
+  79          void main (void)
+  80          {
+  81            P2=0XA0;P0=0X00;P2=0X80;P0=0XFE;//初始化程序
+  82            
+  83            while(1)
+  84            { P0=0XFE;              //1111 1110
+  85              for(i=0;i<65535;i++);
+  86              P0=0XFD;              //1111 1101
+  87              for(i=0;i<65535;i++);
+  88              P0=0XFB;              //1111 1011
+  89              for(i=0;i<65535;i++);
+  90              P0=0XF7;              //1111 0111
+  91              for(i=0;i<65535;i++);
+  92              P0=0XE0;              //1110 0000
+  93              for(i=0;i<65535;i++);
+  94              P0=0XDF;              //1101 1111
+  95              for(i=0;i<65535;i++);
+  96              P0=0XBF;              //1011 1111
+  97              for(i=0;i<65535;i++);
+  98              P0=0X7F;              //0111 1111
+  99              for(i=0;i<65535;i++);
+ 100              P0=0X00;              //0000 0000
+ 101              for(i=0;i<65535;i++);
+ 102            }
+ 103          }
+ 104          */
+ 105          /*#include<stc15f2k60s2.H>
+ 106          
+ 107            void Delayms (int ms);
+ 108            void main(void)
+ 109          {
+ 110            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;//初始化程序
+ 111            
+ 112            while(1)
+ 113            {
+ 114              P0=0XFE;//1110 1111
+ 115              Delayms(100);
+ 116              P0=0XFD;
+C51 COMPILER V9.60.0.0   MAIN                                                              01/23/2022 16:30:31 PAGE 3   
+
+ 117              Delayms(300);
+ 118              P0=0XFB;
+ 119              Delayms(500);
+ 120              P0=0XF7;
+ 121              Delayms(800);
+ 122              P0=0XEF;
+ 123              Delayms(1000);
+ 124              P0=0XDF;
+ 125              Delayms(1000);
+ 126              P0=0XBF;
+ 127              Delayms(1000);
+ 128              P0=0X7F;
+ 129              Delayms(2000);
+ 130              P0=0XFF;
+ 131              Delayms(200);
+ 132            }
+ 133          }
+ 134          
+ 135            void Delayms(int ms)
+ 136            {
+ 137              int i,j;
+ 138              for(i=0;i<ms;i++)
+ 139                for(j=845;j>0;j--);
+ 140            }
+ 141          
+ 142          */
+ 143          //流水灯程序（简洁）
+ 144          /*#include<STC15F2K60S2.H>
+ 145            
+ 146            unsigned char LED;
+ 147            
+ 148            void Delayms(int ms);
+ 149            void main(void)
+ 150          {
+ 151            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;//初始化程序
+ 152            
+ 153            while(1)
+ 154            {
+ 155              for(LED=0;LED<8;LED++)
+ 156              {
+ 157                P0=~(0X01<<LED);//0000 0001 ~ 1111 1110 //0000 0010 ~ 1111 1101
+ 158                Delayms(1000);
+ 159              }
+ 160            }
+ 161          }
+ 162          
+ 163          void Delayms(int ms)
+ 164          {
+ 165            int i,j;
+ 166                for(i=0;i<ms;i++)
+ 167                for(j=845;j>0;j--);
+ 168          }
+ 169          */
+ 170          
+ 171          //sbit的应用
+ 172          /*#include<STC15F2K60S2.H>
+ 173            
+ 174          sbit LED1=P0^0;
+ 175          
+ 176          void main (void)
+ 177          {
+ 178            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+C51 COMPILER V9.60.0.0   MAIN                                                              01/23/2022 16:30:31 PAGE 4   
+
+ 179            
+ 180            LED1=0;
+ 181            while(1);
+ 182          }*/
+ 183          /*#include<STC15F2K60S2.H>
+ 184          
+ 185          void main(void)
+ 186          {
+ 187            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 188            
+ 189            while(1)
+ 190            {
+ 191            if(P30==0)P00=0;
+ 192            if(P31==0)P0=0X01;
+ 193            }
+ 194          }*/
+ 195          
+ 196          #include "reg52.h"
+ 197          #include "iic.h"
+*** WARNING C318 IN LINE 197 OF main.c: can't open file 'iic.h'
+ 198          #include "intrins.h"
+ 199          
+ 200          sfr AUXR = 0X8E;
+ 201          sbit S4 = P3^3;
+ 202          unsigned char code SMG_duanma[] = {0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F,0x77,0x7C,0x39,0x5E,0
+             -x79,0x71,0x40,0x80};
+ 203          bit Key_channel = 0;
+ 204          unsigned int dat,dat_channel_1,dat_channel_3;
+ 205          
+ 206          void SelectHC573(unsigned char channel)
+ 207          {
+ 208   1      switch(channel)
+ 209   1      {
+ 210   2      case 4:
+ 211   2      P2 = (P2 & 0X1F) | 0X80;
+ 212   2      break;
+ 213   2      case 5:
+ 214   2      P2 = (P2 & 0X1F) | 0XA0;
+ 215   2      break;
+ 216   2      case 6:
+ 217   2      P2 = (P2 & 0X1F) | 0XC0;
+ 218   2      break;
+ 219   2      case 7:
+ 220   2      P2 = (P2 & 0X1F) | 0XE0;
+ 221   2      break;
+ 222   2      case 0:
+ 223   2      P2 = (P2 & 0X1F) | 0X00;
+ 224   2      break;
+ 225   2      }
+ 226   1      }
+ 227          
+ 228          void InitSystem()
+ 229          {
+ 230   1      SelectHC573(4);
+ 231   1      P0 = 0XFF;
+ 232   1      SelectHC573(5);
+ 233   1      P0 = 0X00;
+ 234   1      SelectHC573(6);
+ 235   1      P0 = 0X00;
+ 236   1      SelectHC573(7);
+ 237   1      P0 = 0XFF;
+ 238   1      SelectHC573(0);
+C51 COMPILER V9.60.0.0   MAIN                                                              01/23/2022 16:30:31 PAGE 5   
+
+ 239   1      }
+ 240          
+ 241          void DelayK(unsigned int t)
+ 242          {
+ 243   1      while(t--);
+ 244   1      while(t--);
+ 245   1      }
+ 246          
+ 247          void ScanKeys()
+ 248          {
+ 249   1      if(S4 == 0)
+ 250   1      {
+ 251   2      DelayK(10000);
+ 252   2      if(S4 == 0)
+ 253   2      {
+ 254   3      while(S4 == 0);
+ 255   3      Key_channel = ~Key_channel;
+ 256   3      }
+ 257   2      }
+ 258   1      }
+ 259          void Read_AIN1()
+ 260          {
+ 261   1      IIC_Start();
+*** WARNING C206 IN LINE 261 OF main.c: 'IIC_Start': missing function-prototype
+ 262   1      IIC_SendByte(0x90);
+*** WARNING C206 IN LINE 262 OF main.c: 'IIC_SendByte': missing function-prototype
+*** ERROR C267 IN LINE 262 OF main.c: 'IIC_SendByte': requires ANSI-style prototype
+ 263   1      IIC_WaitAck();
+ 264   1      IIC_SendByte(0x01);
+ 265   1      IIC_WaitAck();
+ 266   1      IIC_Stop();
+ 267   1      IIC_Start();
+ 268   1      }
+ 269          
+ 270          
+ 271          
+ 272          
+ 273          
+ 274          
+
+C51 COMPILATION COMPLETE.  3 WARNING(S),  1 ERROR(S)

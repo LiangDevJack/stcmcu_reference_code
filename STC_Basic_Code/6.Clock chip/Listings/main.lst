@@ -1,0 +1,275 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              08/30/2021 21:34:55 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<STC15F2K60S2.H>
+   2          #include<INTRINS.H>
+   3          #define uchar unsigned char;
+   4          #define uint unsigned int;
+   5          
+   6          sbit SCK=P1^7;//U19
+   7          sbit SDA=P2^3;//数据线
+   8          sbit RST=P1^3;
+   9          
+  10          uchar tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,0XBF,0XFF};
+  11          uchar yi,er,san,si,wu,liu,qi,ba;
+  12          bit S4,S5,S6,S7;
+  13          uchar tt;
+  14          
+  15          uchar Init_Time[]={50,59,23,16,10,2,19};
+  16          uchar shijian[7];//赋予七个内容
+  17          void Write_Byte(unsigned char temp);
+  18          void Write_DS1302(unsigned char address,unsigned char dat);
+  19          void Display1(yi,er);
+  20          void Display2(san,si);
+  21          void Display3(wu,liu);
+  22          void Display4(qi,ba);
+  23          void DS1302_Init(void);
+  24          void DS1302_Get(void);
+  25          void Allinit(void);
+  26          
+  27          unsigned char Read_DS1302(unsigned char address);
+  28          
+  29          void Delayms(int ms); 
+  30          void main (void) 
+  31          {
+  32   1        Allinit();
+  33   1        DS1302_Init();
+  34   1        yi=0;er=8;san=10;si=5;wu=9;liu=10;qi=5;ba=0;
+  35   1        while(1)
+  36   1        {
+  37   2          DS1302_Get();
+  38   2          yi=shijian[2]/10;er=shijian[2]%10;san=10;
+  39   2          si=shijian[1]/10;wu=shijian[1]%10;liu=10;
+  40   2          qi=11;ba=11;
+  41   2          tt++;
+  42   2          if(tt==100)
+  43   2          {
+  44   3            tt=0;
+  45   3            qi=shijian[0]/10;
+  46   3            ba=shijian[0]%10;
+  47   3            Delayms(5);
+  48   3          }
+  49   2          Display1(yi,er);
+  50   2          Display2(san,si);
+  51   2          Display3(wu,liu);
+  52   2          Display4(qi,ba);
+  53   2        }
+  54   1      }
+C51 COMPILER V9.59.0.0   MAIN                                                              08/30/2021 21:34:55 PAGE 2   
+
+  55            
+  56          void Write_Byte(unsigned char temp)
+  57          {
+  58   1        unsigned char i;
+  59   1        for(i=0;i<8;i++)
+  60   1        {
+  61   2          SCK=0;
+  62   2          SDA=temp&0X01;
+  63   2          temp>>=1;
+  64   2          SCK=1;
+  65   2        }
+  66   1      }
+  67          void Write_DS1302(unsigned char address,unsigned char dat)
+  68          {
+  69   1        
+  70   1        RST=0;
+  71   1        _nop_();
+  72   1        SCK=0;
+  73   1        _nop_();
+  74   1        RST=1;
+  75   1        Write_Byte(address);
+  76   1        Write_Byte(((dat/10)<<4)|(dat%10));//向左移四位；变为高四位
+  77   1      }
+  78          unsigned char Read_DS1302(unsigned char address)
+  79          {
+  80   1        unsigned char i,temp,dat1,dat2;
+  81   1        RST=0;
+  82   1        _nop_();
+  83   1        SCK=0;
+  84   1        _nop_();
+  85   1        RST=1;
+  86   1        Write_Byte(address);
+  87   1        
+  88   1        for(i=0;i<8;i++)
+  89   1        {
+  90   2          SCK=0;
+  91   2          temp>>=1;
+  92   2          if(SDA)temp|=0X80;
+  93   2          SCK=1;
+  94   2        }
+  95   1        SDA=0;//没有上拉电阻，利于稳定需要置零
+  96   1        dat1=temp/16;//高四位的值
+  97   1        dat2=temp%16;
+  98   1        temp=dat1*10+dat2;
+  99   1        
+ 100   1        return temp;
+ 101   1      }
+ 102          
+ 103          void DS1302_Init(void)
+ 104          {
+ 105   1        unsigned char i,add;
+ 106   1        add=0X80;
+ 107   1        Write_DS1302(0X8E,0X00);
+ 108   1        for(i=0;i<7;i++)//七个地址
+ 109   1          {
+ 110   2            Write_DS1302(add,Init_Time[i]);
+ 111   2            add=add+2;
+ 112   2          }
+ 113   1          Write_DS1302(0X8E,0X80);
+ 114   1      }
+ 115           
+ 116          void DS1302_Get(void)
+C51 COMPILER V9.59.0.0   MAIN                                                              08/30/2021 21:34:55 PAGE 3   
+
+ 117          {
+ 118   1        unsigned char i,add;
+ 119   1        add=0X81;
+ 120   1        Write_DS1302(0X8E,0X00);
+ 121   1        for(i=0;i<7;i++)
+ 122   1          {
+ 123   2            shijian[i]=Read_DS1302(add);
+ 124   2            add=add+2;
+ 125   2          }
+ 126   1        Write_DS1302(0X8E,0X80);
+ 127   1      }
+ 128          
+ 129          void Display1(yi,er)//数码管
+ 130          {
+ 131   1        P2=0XC0;
+ 132   1        P0=0X01;//0000 0001
+ 133   1        P2=0XE0;
+ 134   1        P0=tap[yi];
+ 135   1        Delayms(1);
+ 136   1        
+ 137   1        P2=0XC0;
+ 138   1        P0=0X02;
+ 139   1        P2=0XE0;
+ 140   1        P0=tap[er];
+ 141   1        Delayms(1);
+ 142   1      }
+ 143          void Display2(san,si)
+ 144          {
+ 145   1        P2=0XC0;
+ 146   1        P0=0X04;
+ 147   1        P2=0XE0;
+ 148   1        P0=tap[san];
+ 149   1        Delayms(1);
+ 150   1        
+ 151   1        P2=0XC0;
+ 152   1        P0=0X08;
+ 153   1        P2=0XE0;
+ 154   1        P0=tap[si];
+ 155   1        Delayms(1);
+ 156   1      }
+ 157          void Display3(wu,liu)
+ 158          {
+ 159   1        P2=0XC0;
+ 160   1        P0=0X10;
+ 161   1        P2=0XE0;
+ 162   1        P0=tap[wu];
+ 163   1        Delayms(1);
+ 164   1        
+ 165   1        P2=0XC0;
+ 166   1        P0=0X20;
+ 167   1        P2=0XE0;
+ 168   1        P0=tap[liu];
+ 169   1        Delayms(1);
+ 170   1      }
+ 171          void Display4(qi,ba)
+ 172          {
+ 173   1        P2=0XC0;
+ 174   1        P0=0X40;//0100 0000
+ 175   1        P2=0XE0;
+ 176   1        P0=tap[qi];
+ 177   1        Delayms(1);
+ 178   1        
+C51 COMPILER V9.59.0.0   MAIN                                                              08/30/2021 21:34:55 PAGE 4   
+
+ 179   1        P2=0XC0;
+ 180   1        P0=0X80;
+ 181   1        P2=0XE0;
+ 182   1        P0=tap[ba];
+ 183   1        Delayms(1);
+ 184   1      }
+ 185          void Allinit(void)
+ 186          {
+ 187   1        P2=0XA0;//打开控制蜂鸣器的573
+ 188   1        P0=0X00;//关闭蜂鸣器继电器
+ 189   1        
+ 190   1        P2=0XC0;//打开控制数码管的位选573
+ 191   1        P0=0XFF;//选中所有的数码管
+ 192   1        P2=0XE0;//打开控制数码管段选573
+ 193   1        P0=0XFF;//关闭所有数码管
+ 194   1        
+ 195   1        P2=0X80;//打开控制LED灯的573
+ 196   1        P0=0XFF;//关闭所有LED灯
+ 197   1      }
+ 198          
+ 199          void Delayms (int ms)
+ 200          {
+ 201   1        int i,j;
+ 202   1        for(i=0;i<ms;i++)
+ 203   1          for(j=845;j>0;j--);
+ 204   1      }
+ 205          
+ 206          
+ 207          
+ 208          
+ 209          
+ 210          
+ 211          
+ 212          
+ 213          
+ 214          
+ 215          
+ 216          
+ 217          
+ 218          
+ 219          
+ 220          
+ 221          
+ 222          
+ 223          
+ 224          
+ 225          
+ 226          
+ 227          
+ 228          
+ 229          
+ 230          
+ 231          
+ 232          
+ 233          
+ 234          
+ 235          
+ 236          
+ 237          
+ 238          
+ 239          
+ 240          
+C51 COMPILER V9.59.0.0   MAIN                                                              08/30/2021 21:34:55 PAGE 5   
+
+ 241          
+ 242          
+ 243          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    687    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     70       8
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      4    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

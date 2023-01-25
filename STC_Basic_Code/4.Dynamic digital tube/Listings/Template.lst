@@ -1,0 +1,327 @@
+C51 COMPILER V9.59.0.0   TEMPLATE                                                          08/25/2021 10:43:09 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE TEMPLATE
+OBJECT MODULE PLACED IN .\Objects\Template.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Template.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\
+                    -Template.lst) TABS(2) OBJECT(.\Objects\Template.obj)
+
+line level    source
+
+   1          /*#include<STC15F2K60S2.H>
+   2          #include<INTRINS.H>
+   3          
+   4          #define uchar unsigned char
+   5          #define uint unsigned char
+   6          uchar tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,0XBF,0XFF};
+   7          uchar yi,er,san,si,wu,liu,qi,ba;
+   8          bit s4,s5;s6,s7;
+   9          void Display1(yi,er);
+  10          void Display2(san,si);
+  11          void Display3(wu,liu);
+  12          void Display4(qi,ba);
+  13          
+  14          
+  15          void keyscan(void);
+  16          void Allinit (void);
+  17          void Delayms(int ms);
+  18          uchar num;
+  19          void main(void)
+  20          {
+  21            Allinit();
+  22            yi=1;er=2;san=3;si=4;wu=5;liu=6;qi=7;ba=8;
+  23            while(1)
+  24            {
+  25              //keyscan16();
+  26              keyscan();
+  27              Display1(yi,er);
+  28              yi=num;
+  29              if(s7==1)
+  30              {
+  31                yi=11;er=11;san=11;si=11;wu=11;liu=11;qi=2;ba=5;
+  32                Display1(yi,er);
+  33                Display2(san,si);
+  34                Display3(wu,liu);
+  35                Display4(qi,ba);
+  36              }
+  37            }
+  38          }
+  39          void keyscan16(void)//矩阵按键
+  40          {
+  41            uchar temp;
+  42            
+  43            P44=0;P42=1;P3=0X7F;//0111 1111
+  44            temp=P3;
+  45            temp=temp&0X0F;
+  46            if(temp!=0X0F)
+  47            {
+  48              Delayms(5);
+  49              temp=P3;
+  50              temp=temp&0X0F;
+  51              if(temp!=0X0F)
+  52              {
+  53                temp=P3;
+  54                switch(temp)
+C51 COMPILER V9.59.0.0   TEMPLATE                                                          08/25/2021 10:43:09 PAGE 2   
+
+  55                {
+  56                  case 0X7E:num=0;break;//0111 1110
+  57                  case 0X7D:num=1;break;//0111 1101
+  58                  case 0X7B:num=2;break;
+  59                  case 0X77:num=3;break;
+  60                }
+  61                while(temp!=0X0F)
+  62                {
+  63                  temp=P3;
+  64                  temp=temp&0X0F;
+  65                }
+  66              }
+  67            }
+  68            
+  69            P44=1;P42=0;P3=0XBF;
+  70            temp=P3;
+  71            temp=temp&0X0F;
+  72            if(temp!=0X0F)
+  73            {
+  74              Delayms(5);
+  75              temp=P3;
+  76              temp=temp&0X0F;
+  77              if(temp!=0X0F)
+  78              {
+  79                temp=P3;
+  80                switch(temp)
+  81                {
+  82                  case 0XBE:num=4;break;
+  83                  case 0XBD:num=5;break;
+  84                  case 0XBB:num=6;break;
+  85                  case 0XB7:num=7;break;
+  86                }
+  87                while(temp!=0X0F)
+  88                {
+  89                  temp=P3;
+  90                  temp=temp&0X0F;
+  91                }
+  92              }
+  93            }
+  94              
+  95            P44=1;P42=1;P3=0XDF;
+  96            temp=P3;
+  97            temp=temp&0X0F;
+  98            if(temp!=0X0F)
+  99            {
+ 100              Delayms(5);
+ 101              temp=P3;
+ 102              temp=temp&0X0F;
+ 103              if(temp!=0X0F)
+ 104              {
+ 105                temp=P3;
+ 106                switch(temp)
+ 107                {
+ 108                  case 0XDE:num=8;break;
+ 109                  case 0XDD:num=9;break;
+ 110                  case 0XDB:num=10;break;
+ 111                  case 0XD7:num=11;break;
+ 112                }
+ 113                while(temp!=0X0F)
+ 114                {
+ 115                  temp=P3;
+ 116                  temp=temp&0X0F;
+C51 COMPILER V9.59.0.0   TEMPLATE                                                          08/25/2021 10:43:09 PAGE 3   
+
+ 117                }
+ 118              }
+ 119            }
+ 120              
+ 121            P44=1;P42=1;P3=0XEF;
+ 122            temp=P3;
+ 123            temp=temp&0X0F;
+ 124            if(temp!=0X0F)
+ 125            {
+ 126              Delayms(5);
+ 127              temp=P3;
+ 128              temp=temp&0X0F;
+ 129              if(temp!=0X0F)
+ 130              {
+ 131                temp=P3;
+ 132                switch(temp)
+ 133                {
+ 134                  case 0XEE:num=12;break;
+ 135                  case 0XED:num=13;break;
+ 136                  case 0XEB:num=14;break;
+ 137                  case 0XE7:num=15;break;
+ 138                }
+ 139                while(temp!=0X0F)
+ 140                {
+ 141                  temp=P3;
+ 142                  temp=temp&0X0F;
+ 143                }
+ 144              }
+ 145            }
+ 146          }
+ 147          void keyscan(void)//独立键盘
+ 148          {
+ 149            if(P30==0)
+ 150            {
+ 151              Delayms(5);
+ 152              if(P30==0)
+ 153              {
+ 154                s7=1;yi=1;
+ 155              }
+ 156              while(!P30);//等待手的松开,抬手检测
+ 157            }
+ 158            else if(P31==0)
+ 159            {
+ 160              Delayms(5);
+ 161              if(P31==0)
+ 162              {
+ 163                s6=1;er=2;
+ 164              }
+ 165              while(!P31);//等待手的松开,抬手检测
+ 166            }
+ 167            else if(P32==0)
+ 168            {
+ 169              Delayms(5);
+ 170              if(P32==0)
+ 171              {
+ 172                s5=1;san=3;
+ 173              }
+ 174              while(!P32);//等待手的松开,抬手检测
+ 175            }
+ 176            else  if(P33==0)
+ 177            {
+ 178              Delayms(5);
+C51 COMPILER V9.59.0.0   TEMPLATE                                                          08/25/2021 10:43:09 PAGE 4   
+
+ 179              if(P33==0)
+ 180              {
+ 181                s4=1;si=4;
+ 182              }
+ 183              while(!P33);//等待手的松开,抬手检测
+ 184            }
+ 185          }
+ 186          
+ 187          
+ 188          
+ 189          
+ 190          
+ 191          
+ 192          void Display1(yi,er)//数码管
+ 193          {
+ 194            P2=0XC0;
+ 195            P0=0X01;//0000 0001
+ 196            P2=0XE0;
+ 197            P0=tap[yi];
+ 198            Delayms(1);
+ 199            
+ 200            P2=0XC0;
+ 201            P0=0X02;
+ 202            P2=0XE0;
+ 203            P0=tap[er];
+ 204            Delayms(1);
+ 205          }
+ 206          void Display2(san,si)
+ 207          {
+ 208            P2=0XC0;
+ 209            P0=0X04;
+ 210            P2=0XE0;
+ 211            P0=tap[san];
+ 212            Delayms(1);
+ 213            
+ 214            P2=0XC0;
+ 215            P0=0X08;
+ 216            P2=0XE0;
+ 217            P0=tap[si];
+ 218            Delayms(1);
+ 219          }
+ 220          void Display3(wu,liu)
+ 221          {
+ 222            P2=0XC0;
+ 223            P0=0X10;
+ 224            P2=0XE0;
+ 225            P0=tap[wu];
+ 226            Delayms(1);
+ 227            
+ 228            P2=0XC0;
+ 229            P0=0X20;
+ 230            P2=0XE0;
+ 231            P0=tap[liu];
+ 232            Delayms(1);
+ 233          }
+ 234          void Display4(qi,ba)
+ 235          {
+ 236            P2=0XC0;
+ 237            P0=0X40;//0100 0000
+ 238            P2=0XE0;
+ 239            P0=tap[qi];
+ 240            Delayms(1);
+C51 COMPILER V9.59.0.0   TEMPLATE                                                          08/25/2021 10:43:09 PAGE 5   
+
+ 241            
+ 242            P2=0XC0;
+ 243            P0=0X80;
+ 244            P2=0XE0;
+ 245            P0=tap[ba];
+ 246            Delayms(1);
+ 247          }
+ 248          void Allinit(void)
+ 249          {
+ 250            P2=0XA0;//打开控制蜂鸣器的573
+ 251            P0=0X00;//关闭蜂鸣器继电器
+ 252            
+ 253            P2=0XC0;//打开控制数码管的位选573
+ 254            P0=0XFF;//选中所有的数码管
+ 255            P2=0XE0;//打开控制数码管段选573
+ 256            P0=0XFF;//关闭所有数码管
+ 257            
+ 258            P2=0X80;//打开控制LED灯的573
+ 259            P0=0XFF;//关闭所有LED灯
+ 260          }
+ 261          
+ 262          
+ 263          
+ 264          void Delayms (int ms)
+ 265          {
+ 266            int i,j;
+ 267            for(i=0;i<ms;i++)
+ 268              for(j=845;j>0;j--);
+ 269          }
+ 270          /*void Delayms (int ms)
+ 271          {
+ 272            uchar i,j,k;
+ 273            for(k=0;k<ms;k++)
+ 274              {
+ 275                _nop_();
+ 276                _nop_();
+ 277                _nop_();
+ 278                i=11;
+ 279                j=190;
+ 280                do
+ 281                {
+ 282                  while(--j);
+ 283                } 
+ 284                  while(--i);
+ 285              }
+ 286          }*/
+ 287          
+ 288          
+ 289          
+ 290          
+ 291          
+ 292          
+ 293          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+C51 COMPILER V9.59.0.0   TEMPLATE                                                          08/25/2021 10:43:09 PAGE 6   
+
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

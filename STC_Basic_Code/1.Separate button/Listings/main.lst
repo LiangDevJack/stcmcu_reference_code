@@ -1,0 +1,560 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              10/26/2022 18:22:59 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          //按键控制LED灯
+   2          /*#include<STC15F2K60S2.H>
+   3          
+   4          void main(void)
+   5          {
+   6            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+   7            
+   8            while(1)
+   9            {
+  10            if(P30==0)P00=0;
+  11            if(P31==0)P0=0X01;
+  12            }
+  13          }
+  14          */  
+  15          //按键一次流水灯
+  16          /*#include<STC15F2K60S2.H>
+  17          
+  18          unsigned char LED;
+  19          void Delayms(int ms);
+  20          
+  21          void main(void)
+  22          {
+  23            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+  24            if(P30==0)
+  25            {
+  26              for(LED=0;LED<8;LED++)
+  27              {
+  28                P0=~(0X01<<LED);
+  29                Delayms(1000);
+  30              }
+  31            }
+  32          }
+  33          void Delayms(int ms)
+  34          {
+  35            int i,j;
+  36            for(i=0;i<ms;i++)
+  37              for(j=845;j>0;j--);
+  38          }
+  39          */
+  40          //按键控制流水灯循环
+  41          /*#include<STC15F2K60S2.H>
+  42          
+  43          unsigned char LED;
+  44          unsigned char LED_RUN;
+  45          void Delayms(int ms);
+  46          
+  47          void main(void)
+  48          {
+  49            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+  50            while(1)
+  51            {
+  52              if(P30==0)LED_RUN=1;
+  53              if(LED_RUN==1)
+  54              {
+C51 COMPILER V9.60.0.0   MAIN                                                              10/26/2022 18:22:59 PAGE 2   
+
+  55                for(LED=0;LED<8;LED++)
+  56                {
+  57                  P0=~(0X01<<LED);
+  58                  Delayms(1000);
+  59                }
+  60              }
+  61            }
+  62          }
+  63          void Delayms(int ms)
+  64          {
+  65            int i,j;
+  66            for(i=0;i<ms;i++)
+  67              for(j=845;j>0;j--);
+  68          }
+  69          */
+  70          
+  71          //按键连续流水灯
+  72          /*#include<STC15F2K60S2.H>
+  73          
+  74          unsigned char LED=0;
+  75          void Delayms(int ms);
+  76          
+  77          void main(void)
+  78          {
+  79            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+  80            
+  81            while(1)
+  82            {
+  83              if(P30==0)LED++;
+  84              P0=~(0X01<<LED);
+  85              Delayms(100);
+  86            }
+  87          }
+  88          void Delayms(int ms)
+  89          {
+  90            int i,j;
+  91            for(i=0;i<ms;i++)
+  92              for(j=845;j>0;j--);
+  93          }
+  94          */
+  95          //按键非连续流水灯
+  96          /*#include<STC15F2K60S2.H>
+  97          
+  98          unsigned char LED=0;
+  99          void Delayms(int ms);
+ 100          
+ 101          void main(void)
+ 102          {
+ 103            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 104            
+ 105            while(1)//括号为非零常量死循环
+ 106            {
+ 107              if(P30==0)
+ 108              {
+ 109                Delayms(5);//防抖动程序
+ 110                if(P30==0)
+ 111                {
+ 112                  P0=~(0X01<<LED);
+ 113                  LED++;
+ 114                  if(LED==8)LED=0;//循环
+ 115                }
+ 116                while(!P30);//P30!=0为假停止；
+C51 COMPILER V9.60.0.0   MAIN                                                              10/26/2022 18:22:59 PAGE 3   
+
+ 117                Delayms(100);
+ 118              }
+ 119            }
+ 120          }
+ 121          
+ 122          void Delayms(int ms)
+ 123          {
+ 124            int i,j;
+ 125            for(i=0;i<ms;i++)
+ 126              for(j=845;j>0;j--);
+ 127          }
+ 128          */
+ 129          /*#include<STC15F2K60S2.H>
+ 130          
+ 131          unsigned char LED=0;
+ 132          void Delayms(int ms);
+ 133          
+ 134          void main(void)
+ 135          {
+ 136            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 137            
+ 138            while(1)
+ 139            {
+ 140              if(P30==0)LED++;
+ 141              P0=~0X01<<LED;
+ 142              //Delayms(100);
+ 143            }
+ 144          }
+ 145          void Delayms(int ms)
+ 146          {
+ 147            int i,j;
+ 148            for(i=0;i<ms;i++)
+ 149              for(j=845;j>0;j--);
+ 150          }*/
+ 151            
+ 152          //按键非连续流水灯
+ 153          /*#include<STC15F2K60S2.H>
+ 154          
+ 155          unsigned char LED=0;
+ 156          void Delayms(int ms);
+ 157          
+ 158          void main(void)
+ 159          {
+ 160            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 161            
+ 162            while(1)
+ 163            {
+ 164              if(P30==0)
+ 165              {
+ 166                Delayms(5);//防抖动程序
+ 167                if(P30==0)
+ 168                {
+ 169                  P0=~(0X01<<LED);
+ 170                  LED++;
+ 171                  if(LED==8)LED=0;
+ 172                }
+ 173                while(!P30);//非连续
+ 174                Delayms(100);//防抖
+ 175              }
+ 176            }
+ 177          }
+ 178          void Delayms(int ms)
+C51 COMPILER V9.60.0.0   MAIN                                                              10/26/2022 18:22:59 PAGE 4   
+
+ 179          {
+ 180            int i,j;
+ 181            for(i=0;i<ms;i++)
+ 182              for(j=845;j>0;j--);
+ 183          }
+ 184          */  
+ 185          
+ 186          //按键控制LED灯，抬手检测
+ 187          /*#include<STC15F2K60S2.H>
+ 188          
+ 189          unsigned char LED=0;
+ 190          unsigned char LED_Flag=0;
+ 191          void Delayms(int ms);
+ 192          
+ 193          void main(void)
+ 194          {
+ 195            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 196            
+ 197            while(1)
+ 198            {
+ 199              if(P30==0)
+ 200              {
+ 201                Delayms(5);//防抖动程序
+ 202                if(P30==0)
+ 203                {
+ 204                  LED_Flag=1;
+ 205                }
+ 206                while(!P30);//停止
+ 207              }
+ 208                if(LED_Flag==1)
+ 209                {
+ 210                  LED_Flag=0;
+ 211                  P0=~(0X01<<LED);
+ 212                  LED++;
+ 213                  if(LED==8)LED=0;
+ 214                }
+ 215            }
+ 216                
+ 217          }
+ 218          void Delayms(int ms)
+ 219          {
+ 220            int i,j;
+ 221            for(i=0;i<ms;i++)
+ 222              for(j=845;j>0;j--);
+ 223          }
+ 224          */
+ 225          //按键控制流水灯，子函数
+ 226          /*#include<STC15F2K60S2.H>
+ 227          
+ 228          unsigned char LED=0;
+ 229          unsigned char LED_Flag=0;
+ 230          void Delayms(int ms);
+ 231          void Key_Scan(void);
+ 232          
+ 233          void main(void)
+ 234          {
+ 235            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 236            
+ 237            while(1)
+ 238            {
+ 239                Key_Scan();
+ 240                if(LED_Flag==1)
+C51 COMPILER V9.60.0.0   MAIN                                                              10/26/2022 18:22:59 PAGE 5   
+
+ 241                {
+ 242                  LED_Flag=0;
+ 243                  P0=~(0X01<<LED);
+ 244                  LED++;
+ 245                  if(LED==8)LED=0;
+ 246                }
+ 247            }
+ 248          }
+ 249          void Key_Scan(void)
+ 250          { 
+ 251              if(P30==0)//按键S7
+ 252              {
+ 253                Delayms(5);//防抖动程序
+ 254                if(P30==0)
+ 255                {
+ 256                  LED_Flag=1;
+ 257                }
+ 258                while(!P30);
+ 259              }
+ 260              if(P31==0)//按键S6
+ 261              {
+ 262                Delayms(5);//防抖动程序
+ 263                if(P31==0)
+ 264                {
+ 265                  LED_Flag=1;
+ 266                }
+ 267                while(!P31);
+ 268              }
+ 269              if(P32==0)//按键S5
+ 270              {
+ 271                Delayms(5);//防抖动程序
+ 272                if(P32==0)
+ 273                {
+ 274                  LED_Flag=1;
+ 275                }
+ 276                while(!P32);
+ 277              }
+ 278              if(P33==0)//按键S4
+ 279              {
+ 280                Delayms(5);//防抖动程序
+ 281                if(P33==0)
+ 282                {
+ 283                  LED_Flag=1;
+ 284                }
+ 285                while(!P33);
+ 286              }
+ 287          }
+ 288          void Delayms(int ms)
+ 289          {
+ 290            int i,j;
+ 291            for(i=0;i<ms;i++)
+ 292              for(j=845;j>0;j--);
+ 293          }
+ 294          */
+ 295          
+ 296          //按键控制流水灯，四个按键
+ 297          /*#include<STC15F2K60S2.H>
+ 298          
+ 299          unsigned char LED=0;
+ 300          unsigned char LED_Flag=0;
+ 301          unsigned char LED_RUN=0;
+ 302          void Delayms(int ms);
+C51 COMPILER V9.60.0.0   MAIN                                                              10/26/2022 18:22:59 PAGE 6   
+
+ 303          void Key_Scan(void);
+ 304          
+ 305          void main(void)
+ 306          {
+ 307            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 308            
+ 309            while(1)
+ 310            {
+ 311                Key_Scan();
+ 312                if(LED_Flag==1)
+ 313                {
+ 314                  LED_Flag=0;
+ 315                  P0=~(0X01<<LED);
+ 316                  LED++;
+ 317                  if(LED==8)LED=0;
+ 318                  Delayms(1000);
+ 319                }
+ 320                
+ 321                if(LED_RUN==1)
+ 322                {
+ 323                  P0=~(0X01<<LED);
+ 324                  LED++;
+ 325                  if(LED==8)LED=0;
+ 326                  Delayms(1000);
+ 327                }     
+ 328            }
+ 329          }
+ 330          void Key_Scan(void)
+ 331          { 
+ 332              if(P30==0)//按键S7
+ 333              {
+ 334                Delayms(5);//防抖动程序
+ 335                if(P30==0)
+ 336                {
+ 337                  LED_Flag=1;
+ 338                }
+ 339                while(!P30);
+ 340              }
+ 341              if(P31==0)//按键S6
+ 342              {
+ 343                Delayms(5);//防抖动程序
+ 344                if(P31==0)
+ 345                {
+ 346                  LED_RUN=1;
+ 347                }
+ 348                while(!P31);
+ 349              }
+ 350              if(P32==0)//按键S5
+ 351              {
+ 352                Delayms(5);//防抖动程序
+ 353                if(P32==0)
+ 354                {
+ 355                  P00=0;
+ 356                }
+ 357                while(!P32);
+ 358              }
+ 359              if(P33==0)//按键S4
+ 360              {
+ 361                Delayms(5);//防抖动程序
+ 362                if(P33==0)
+ 363                {
+ 364                P00=1;
+C51 COMPILER V9.60.0.0   MAIN                                                              10/26/2022 18:22:59 PAGE 7   
+
+ 365                }
+ 366                while(!P33);
+ 367              }
+ 368          }
+ 369          void Delayms(int ms)
+ 370          {
+ 371            int i,j;
+ 372            for(i=0;i<ms;i++)
+ 373              for(j=845;j>0;j--);
+ 374          }
+ 375          */
+ 376          
+ 377          //#include<STC15F2K60S2.H>
+ 378          
+ 379          //unsigned char LED=0;
+ 380          //unsigned char LED_Flag=0;
+ 381          //void Delayms(int ms);
+ 382          //void Key_Scan(void);
+ 383          
+ 384          //void main(void)
+ 385          //{
+ 386          //  P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 387          //  
+ 388          //  while(1)
+ 389          //  {
+ 390          //      Key_Scan();
+ 391          //      if(LED_Flag==1)
+ 392          //      {
+ 393          //        LED_Flag=0;
+ 394          //        P0=0XFE<<LED;
+ 395          //        LED++;
+ 396          //        if(LED==8)LED=0;
+ 397          //      }
+ 398          //  }
+ 399          //}
+ 400          //void Key_Scan(void)
+ 401          //{ 
+ 402          //    if(P30==0)//按键S7
+ 403          //    {
+ 404          //      Delayms(5);//防抖动程序
+ 405          //      if(P30==0)
+ 406          //      {
+ 407          //        LED_Flag=1;
+ 408          //      }
+ 409          //      while(!P30);
+ 410          //    }
+ 411          //    if(P31==0)//按键S6
+ 412          //    {
+ 413          //      Delayms(5);//防抖动程序
+ 414          //      if(P31==0)
+ 415          //      {
+ 416          //        LED_Flag=1;
+ 417          //      }
+ 418          //      while(!P31);
+ 419          //    }
+ 420          //    if(P32==0)//按键S5
+ 421          //    {
+ 422          //      Delayms(5);//防抖动程序
+ 423          //      if(P32==0)
+ 424          //      {
+ 425          //        LED_Flag=1;
+ 426          //      }
+C51 COMPILER V9.60.0.0   MAIN                                                              10/26/2022 18:22:59 PAGE 8   
+
+ 427          //      while(!P32);
+ 428          //    }
+ 429          //    if(P33==0)//按键S4
+ 430          //    {
+ 431          //      Delayms(5);//防抖动程序
+ 432          //      if(P33==0)
+ 433          //      {
+ 434          //        LED_Flag=1;
+ 435          //      }
+ 436          //      while(!P33);
+ 437          //    }
+ 438          //}
+ 439          //void Delayms(int ms)
+ 440          //{
+ 441          //  int i,j;
+ 442          //  for(i=0;i<ms;i++)
+ 443          //    for(j=845;j>0;j--);
+ 444          //}
+ 445          
+ 446          #include<STC15F2K60S2.H>
+ 447          unsigned char s7flag=0,s6flag=0;
+ 448          void delayms(unsigned int ms);
+ 449          void keyscan(void);
+ 450          unsigned char LED=0;
+ 451          void main(void)
+ 452          {
+ 453   1      
+ 454   1        P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 455   1        for(LED=0;LED<8;LED++)
+ 456   1          {
+ 457   2            P0=~(0X01<<LED);//0000 0001 ~ 1111 1110 //0000 0010 ~ 1111 1101
+ 458   2            delayms(1000);
+ 459   2          }
+ 460   1        while(1)
+ 461   1        {
+ 462   2      //    keyscan();
+ 463   2          
+ 464   2          for(LED=0;LED<8;LED++);
+ 465   2            {
+ 466   3              P0=~(0X01<<LED);
+ 467   3              
+ 468   3              delayms(500);
+ 469   3            }
+ 470   2      //    if(s7flag==1)
+ 471   2      //    {
+ 472   2      //      s7flag=0;
+ 473   2      //      
+ 474   2      //      for(LED=0;LED<8;LED++);
+ 475   2      //      {
+ 476   2      //        P0=~(0X01<<LED);
+ 477   2      //        delayms(500);
+ 478   2      //      }
+ 479   2      //    }
+ 480   2      //    if(s6flag==1)
+ 481   2      //    {
+ 482   2      //      s6flag=0;
+ 483   2      //      
+ 484   2      //      for(LED=0;LED<8;LED++);
+ 485   2      //      {
+ 486   2      //        P0=~(0X80>>LED);
+ 487   2      //        delayms(500);
+ 488   2      //      }
+C51 COMPILER V9.60.0.0   MAIN                                                              10/26/2022 18:22:59 PAGE 9   
+
+ 489   2      //    }
+ 490   2        }
+ 491   1      }
+ 492          void keyscan(void)
+ 493          {
+ 494   1        if(P30==0)
+ 495   1        {
+ 496   2          delayms(10);
+ 497   2          if(P30==0)
+ 498   2          {
+ 499   3            s7flag=1;
+ 500   3          }
+ 501   2          while(!P30);
+ 502   2        }
+ 503   1        if(P31==0)
+ 504   1        {
+ 505   2          delayms(10);
+ 506   2          if(P31==0)
+ 507   2          {
+ 508   3            s6flag=1;
+ 509   3          }
+ 510   2          while(!P31);
+ 511   2        }
+ 512   1      }
+ 513          void delayms(unsigned int ms)
+ 514          {
+ 515   1        int i,j;
+ 516   1        for(i=0;i<ms;i++)
+ 517   1        for(j=845;j>0;j--);
+ 518   1      }
+ 519          
+ 520          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    165    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

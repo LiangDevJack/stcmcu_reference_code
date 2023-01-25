@@ -1,0 +1,136 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              10/08/2021 19:53:29 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<STC15F2K60S2.H>
+   2          #include<INTRINS.H>
+   3          
+   4          #define LCD1602_DB P0
+   5          sbit LCD1602_RS=P2^0;  //RS,数据/命令选择端(H/L)
+   6          sbit LCD1602_RW=P2^1;  //R/W，读/写选择端(H/L)
+   7          sbit LCD1602_E=P1^2;  // E,使能信号
+   8          
+   9          
+  10          //读状态
+  11          void read_state(void)
+  12          {
+  13   1        unsigned char sta;      //状态读取存储变量
+  14   1        LCD1602_DB=0xff;  
+  15   1        LCD1602_RS=0;
+  16   1        LCD1602_RW=1;
+  17   1        LCD1602_E=1;
+  18   1        do
+  19   1        {
+  20   2          LCD1602_E=1;
+  21   2          sta=LCD1602_DB; //把状态字读取到sta变量中，可通过最高位判断液晶是否处于忙态，1时为忙 
+  22   2          LCD1602_E=0;  //释放总线，防止影响其他模块
+  23   2        }while(sta&0x80); //判断最高位，直到允许读写时跳出循环
+  24   1      }
+  25          
+  26          //写指令
+  27          void write_cmd(unsigned char cmd)
+  28          {
+  29   1        read_state();
+  30   1        LCD1602_RS=0;   //RS=0->指令
+  31   1        LCD1602_RW=0; //R/W=0->写
+  32   1        LCD1602_DB=cmd; //写入指令
+  33   1        LCD1602_E=1;  
+  34   1        LCD1602_E=0;      
+  35   1      }
+  36           
+  37           //写数据
+  38          void write_data(unsigned char date)
+  39          {
+  40   1        read_state();
+  41   1        LCD1602_RS=1;   //RS=1->数据
+  42   1        LCD1602_RW=0; //R/W=0->写
+  43   1        LCD1602_DB=date;  //写入数据
+  44   1        LCD1602_E=1;
+  45   1        LCD1602_E=0;
+  46   1      }
+  47          //LCD初始化设置
+  48          void lcd_init()
+  49          {   
+  50   1        LCD1602_E=0;     //使能关(操作前关使能使用时打开)
+  51   1        write_cmd(0x3c);     //设置16*2显示，5*7点阵，8位数据口
+  52   1        write_cmd(0x0c);     //设置开显示，不显示光标
+  53   1        write_cmd(0x06);     //设置写一个字符后地址指针自动加1
+  54   1        write_cmd(0x01);     //显示清0，数据指针清0
+C51 COMPILER V9.59.0.0   MAIN                                                              10/08/2021 19:53:29 PAGE 2   
+
+  55   1      }
+  56          
+  57          //x为列，范围0~39
+  58          //y为行,0——第1行,1——第2行
+  59          //将坐标转换为对应的RAM地址，实际指针地址为0x80+RAM映射地址，0x80为指令固定位
+  60          void LCD1602_SetRAM(unsigned char x,unsigned char y)
+  61          {
+  62   1          unsigned char addr;
+  63   1          if(y == 0)
+  64   1              addr = 0x80 + x;
+  65   1          else
+  66   1              addr = 0xc0 + x;
+  67   1          write_cmd(addr);
+  68   1      }
+  69          
+  70          //对应位置显示字符串
+  71          void LCD1602_Show(unsigned char x,unsigned y,unsigned char *str)
+  72          {
+  73   1          LCD1602_SetRAM(x,y);
+  74   1          while(*str != '\0')
+  75   1          {
+  76   2              write_data(*str++);
+  77   2          }
+  78   1      }
+  79          void Delayms (int ms)
+  80          {
+  81   1        int i,j;
+  82   1        for(i=0;i<ms;i++)
+  83   1          for(j=845;j>0;j--);
+  84   1      }
+  85          void main()
+  86          {
+  87   1        lcd_init();
+  88   1        LCD1602_Show(0,0,"Hello everyone!");  //第一行显示Hello everyone!
+  89   1        //向CGRAM中存入字符：write_cmd(0X40+num);num为8的倍数(0~56)
+  90   1        //然后用write_data(data);循环写入8个字节，即一个字符对应的8行
+  91   1        //如果要将CGRAM中自己存入的字符显示到屏幕上
+  92   1        //可先write_cmd(addr);addr为DDRAM的地址
+  93   1        //然后write_data(num);num=1~8,即CGRAM中的8个字符
+  94   1        //注意首先要保证CGRAM中已经存入字符
+  95   1        while(1)
+  96   1        { 
+  97   2          write_cmd(0x18);  //显示器字符左移
+  98   2          Delayms(2000);
+  99   2        }          
+ 100   1      }
+ 101          
+ 102          
+ 103          
+ 104          
+ 105          
+ 106          
+ 107          
+ 108          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    199    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----       3
+C51 COMPILER V9.59.0.0   MAIN                                                              10/08/2021 19:53:29 PAGE 3   
+
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

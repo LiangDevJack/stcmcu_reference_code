@@ -1,0 +1,262 @@
+C51 COMPILER V9.59.0.0   TEXT                                                              08/06/2021 09:02:36 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE TEXT
+OBJECT MODULE PLACED IN .\Objects\Text.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Text.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\Text
+                    -.lst) TABS(2) OBJECT(.\Objects\Text.obj)
+
+line level    source
+
+   1          #include<STC15F2K60S2.H>
+   2          
+   3          typedef unsigned int u16;       
+   4          typedef unsigned char u8;
+   5          typedef unsigned long u32;
+   6          sbit IR_INPUT = P1^1;
+   7          u8 code LedChar[] = {
+   8              0xC0, 0xF9, 0xA4, 0xB0, 0x99, 0x92, 0x82, 0xF8,
+   9              0x80, 0x90, 0x88, 0x83, 0xC6, 0xA1, 0x86, 0x8E
+  10          };
+  11          u8 LedBuff[] = {
+  12           0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+  13          };
+  14          
+  15          u8 T0RH = 0, T0RL = 0;
+  16          
+  17          bit irflag = 0;
+  18          u8 ircode[4];
+  19          
+  20          void InitInfrared()//初始化T1相关参数，等着一会计时用！
+  21          {
+  22   1        IR_INPUT = 1;//确保红外引脚被释放
+  23   1        AUXR &= 0xBF;//定时器时钟12T模式
+  24   1        TMOD &= 0x0F;
+  25   1        TMOD |= 0x10;
+  26   1        TR1 = 0;
+  27   1        ET1 = 0;
+  28   1      }
+  29          
+  30          u16 GetHighTime()
+  31          {
+  32   1        TH1 = 0;
+  33   1        TL1 = 0;
+  34   1        TR1 = 1;
+  35   1        while(IR_INPUT)
+  36   1        {
+  37   2         if(TH1 >= 0x46)//高电平持续时间大于18ms  ...0x4650...
+  38   2          {
+  39   3          break;
+  40   3          }
+  41   2        }
+  42   1       TR1 = 0;
+  43   1      
+  44   1       return (TH1*256 + TL1);
+  45   1      }
+  46          
+  47          u16 GetLowTime()
+  48          {
+  49   1        TH1 = 0;
+  50   1       TL1 = 0;
+  51   1       TR1 = 1;
+  52   1       while(!IR_INPUT)
+  53   1       {
+  54   2         if(TH1 >= 0X46)//低电平持续时间大于18ms  ...0x4650...
+C51 COMPILER V9.59.0.0   TEXT                                                              08/06/2021 09:02:36 PAGE 2   
+
+  55   2        {
+  56   3          break;
+  57   3        }
+  58   2       }
+  59   1       TR1 = 0;
+  60   1      
+  61   1       return (TH1*256 + TL1);
+  62   1      }
+  63          
+  64          void IRScan()//对应的内部晶振11.0592M
+  65          {
+  66   1        u8 i, j;
+  67   1       u8 byt;
+  68   1       u16 time;
+  69   1      
+  70   1       time = GetLowTime();     //引导码的低电平 9ms - 9000
+  71   1       if((time<8500) || (time>9500))
+  72   1       {
+  73   2        return;  
+  74   2       }
+  75   1      
+  76   1       time = GetHighTime();
+  77   1       if((time<4000) || (time>5000))//引导码的高电平 4.5ms - 4500
+  78   1       {
+  79   2         return; 
+  80   2       }
+  81   1      
+  82   1       for(i=0; i<4; i++)
+  83   1       {
+  84   2        for(j=0; j<8; j++)
+  85   2        {
+  86   3          time = GetLowTime();
+  87   3         if((time<340) || (time>780))
+  88   3         {
+  89   4           return;
+  90   4         }
+  91   3      
+  92   3         time = GetHighTime();
+  93   3         if((time>340) && (time<780))
+  94   3         {
+  95   4           byt >>= 1;
+  96   4         }
+  97   3         else if((time>1460) && (time<1900))
+  98   3         {
+  99   4          byt >>= 1;
+ 100   4          byt |= 0x80;
+ 101   4         }
+ 102   3         else
+ 103   3         {
+ 104   4           return;
+ 105   4         }
+ 106   3        }
+ 107   2        ircode[i] = byt;
+ 108   2       }
+ 109   1       irflag = 1;
+ 110   1      }
+ 111          
+ 112          //void IRScan()////对应的内部晶振12M
+ 113          //{
+ 114          //  u8 i, j;
+ 115          // u8 byt;
+ 116          // u16 time;
+C51 COMPILER V9.59.0.0   TEXT                                                              08/06/2021 09:02:36 PAGE 3   
+
+ 117          
+ 118          // time = GetLowTime();
+ 119          // if((time <7833) || (time > 8755))    
+ 120          // {
+ 121          //  return; 
+ 122          // }
+ 123          
+ 124          // time = GetHighTime();
+ 125          // if((time<3686) || (time > 4608))
+ 126          // {
+ 127          //  return;
+ 128          // }
+ 129          // for(i=0; i<4; i++)
+ 130          // {
+ 131          //  for(j=0; j<8; j++)
+ 132          //  {
+ 133          //   time = GetLowTime();
+ 134          //   if((time<313) ||(time >718))
+ 135          //   {
+ 136          //    return;
+ 137          //   }
+ 138          //   time = GetHighTime();
+ 139          //   if((time>313) && (time <718))
+ 140          //   {
+ 141          //    byt >>= 1; 
+ 142          //   }
+ 143          //   else if((time>1345) && (time<1751))
+ 144          //   {
+ 145          //    byt >>= 1;
+ 146          //    byt |= 0x80;
+ 147          //   }
+ 148          //   else
+ 149          //   {
+ 150          //    return;
+ 151          //   }
+ 152          //  }
+ 153          //  ircode[i] = byt;
+ 154          // }
+ 155          // irflag = 1;
+ 156          //}
+ 157          void CloseFucker()
+ 158          {
+ 159   1        P2 = (P2 & 0x1F) | 0xA0;
+ 160   1       P0 = P0 & 0xAF;
+ 161   1       P2 = P2&0x1F;
+ 162   1      }
+ 163          
+ 164          
+ 165          void ConfigTimer0(u16 ms)
+ 166          {
+ 167   1          u32 tmp; 
+ 168   1          
+ 169   1          tmp = 11059200 / 12;    
+ 170   1          tmp = (tmp * ms) / 1000;  
+ 171   1          tmp = 65536 - tmp;          
+ 172   1          T0RH = (u8)(tmp>>8);  
+ 173   1          T0RL = (u8)tmp;
+ 174   1          TMOD &= 0xF0;   
+ 175   1          TMOD |= 0x01;   
+ 176   1          TH0 = T0RH;     
+ 177   1          TL0 = T0RL;
+ 178   1          ET0 = 1;       
+C51 COMPILER V9.59.0.0   TEXT                                                              08/06/2021 09:02:36 PAGE 4   
+
+ 179   1          TR0 = 1;       
+ 180   1      }
+ 181          
+ 182          void LedScan()
+ 183          {
+ 184   1        static u8 index=0;
+ 185   1      
+ 186   1       P2 = (P2 & 0x1F) | 0xE0;
+ 187   1       P0 = 0xFF;
+ 188   1       P2 = (P2 & 0x1F);
+ 189   1      
+ 190   1       P2 = (P2 & 0x1F) | 0xC0;
+ 191   1       P0 = 0x80>>index;
+ 192   1       P2 = (P2 & 0x1F);
+ 193   1       P2 = (P2 & 0x1F) | 0xE0;
+ 194   1       P0 = LedBuff[index];
+ 195   1       P2 = (P2 & 0x1F);
+ 196   1       
+ 197   1       index++;
+ 198   1       index &= 0x07;
+ 199   1      }
+ 200          
+ 201          void InterruptTimer0() interrupt 1
+ 202          {
+ 203   1          TH0 = T0RH; 
+ 204   1          TL0 = T0RL;
+ 205   1      
+ 206   1       LedScan();
+ 207   1      }
+ 208          void main()
+ 209          { 
+ 210   1       EA = 1;
+ 211   1       CloseFucker();
+ 212   1       ConfigTimer0(1);
+ 213   1       InitInfrared();
+ 214   1      
+ 215   1       while(1)
+ 216   1       {
+ 217   2        if(!IR_INPUT)
+ 218   2        {
+ 219   3         IRScan();
+ 220   3        }
+ 221   2        if(irflag)
+ 222   2        {
+ 223   3          irflag = 0;
+ 224   3         LedBuff[5] = LedChar[ircode[0] >> 4];//用户码
+ 225   3         LedBuff[4] = LedChar[ircode[0]&0x0F];
+ 226   3         LedBuff[1] = LedChar[ircode[2] >> 4];//键码
+ 227   3         LedBuff[0] = LedChar[ircode[2]&0x0F];
+ 228   3        }
+ 229   2       }
+ 230   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    522    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     15       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+C51 COMPILER V9.59.0.0   TEXT                                                              08/06/2021 09:02:36 PAGE 5   
+
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

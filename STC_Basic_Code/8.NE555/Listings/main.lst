@@ -1,0 +1,284 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              12/13/2021 20:49:01 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          
+   2          #include "reg52.h"
+   3          #include "absacc.h"
+   4           
+   5          unsigned char code SMG_DM_NoDot[18]=
+   6              {0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,
+   7               0x88,0x80,0xc6,0xc0,0x86,0x8e,0xbf,0x7f};
+   8           
+   9          unsigned int count_f = 0;
+  10          unsigned char count_t = 0;
+  11          unsigned int dat_f = 0;
+  12           
+  13          void DelaySMG(unsigned int t)
+  14          {
+  15   1        while(t--);
+  16   1      }
+  17           
+  18          void DisplaySMG_Bit(unsigned char pos, unsigned char value)
+  19          {
+  20   1        XBYTE[0xE000] = 0xFF;
+  21   1        XBYTE[0xC000] = 0x01 << pos;
+  22   1        XBYTE[0xE000] = value;
+  23   1      }
+  24           
+  25          void DisplaySMG_F()
+  26          {
+  27   1        DisplaySMG_Bit(0, SMG_DM_NoDot[15]);
+  28   1        DelaySMG(500);
+  29   1        
+  30   1        if(dat_f > 9999)
+  31   1          DisplaySMG_Bit(3, SMG_DM_NoDot[dat_f / 10000]);
+  32   1        DelaySMG(500);
+  33   1        if(dat_f > 999)
+  34   1          DisplaySMG_Bit(4, SMG_DM_NoDot[(dat_f / 1000) % 10]);
+  35   1        DelaySMG(500);
+  36   1        if(dat_f > 99)
+  37   1          DisplaySMG_Bit(5, SMG_DM_NoDot[(dat_f / 100) % 10]);
+  38   1        DelaySMG(500);
+  39   1        if(dat_f > 9)
+  40   1          DisplaySMG_Bit(6, SMG_DM_NoDot[(dat_f / 10) % 10]);
+  41   1        DelaySMG(500);
+  42   1        DisplaySMG_Bit(7, SMG_DM_NoDot[dat_f % 10]);
+  43   1        DelaySMG(500);
+  44   1      }
+  45           
+  46          void Init_Timer()
+  47          {
+  48   1        TH0 = 0xff;        
+  49   1        TL0 = 0xff;
+  50   1        
+  51   1        TH1 = (65536 - 50000) / 256;        
+  52   1        TL1 = (65536 - 50000) % 256;
+  53   1        
+  54   1        TMOD = 0x16;     //定时器1用方式1，定时；定时器0用方式2，计数
+C51 COMPILER V9.59.0.0   MAIN                                                              12/13/2021 20:49:01 PAGE 2   
+
+  55   1        
+  56   1        ET0 = 1;
+  57   1        ET1 = 1;
+  58   1        EA = 1;
+  59   1        
+  60   1        TR0 = 1;
+  61   1        TR1 = 1;
+  62   1      }
+  63           
+  64          void Service_T0() interrupt 1
+  65          {
+  66   1        count_f++;
+  67   1      }
+  68           
+  69          void Service_T1() interrupt 3
+  70          {
+  71   1        TH1 = (65536 - 50000) / 256;        
+  72   1        TL1 = (65536 - 50000) % 256;
+  73   1        count_t++;
+  74   1        if(count_t == 20)
+  75   1        {
+  76   2          dat_f = count_f;
+  77   2          count_f = 0;
+  78   2          count_t = 0;
+  79   2        }
+  80   1      }
+  81           
+  82          void main()
+  83          {
+  84   1        Init_Timer();
+  85   1        XBYTE[0x8000] = 0xff;
+  86   1              XBYTE[0xA000] = 0x00; 
+  87   1        while(1)
+  88   1        {
+  89   2          DisplaySMG_F();
+  90   2        }
+  91   1      }
+  92          
+  93          /*
+  94          #include<stc15f2k60s2.h>
+  95           
+  96          #define uchar unsigned char   //定义无符号字符类型uchar
+  97          #define uint unsigned int     //定义无符号整型类型uint
+  98           
+  99          uchar code tab[]={0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,0xbf,0xff,0x8e};//数字0~9，“-”，“关
+             -”，“F”
+ 100          uchar yi,er,san,si,wu,liu,qi,ba;   //定义字符型变量yi,er,san,si,wu,liu,qi,ba，当作数码管显示控制变量
+ 101           
+ 102          uint fan,fan_send,zheng,zheng_send,trie,pinlv,time;
+ 103          bit flag=0;
+ 104           
+ 105          void delayms(int ms);          //延时函数
+ 106          void allinit();                //初始化函数
+ 107          void display1(uchar yi,uchar er);   //第一、二段数码管函数
+ 108          void display2(uchar san,uchar si);  //第三、四段数码管函数
+ 109          void display3(uchar wu,uchar liu);  //第五、六段数码管函数
+ 110          void display4(uchar qi,uchar ba);   //第七、八段数码管函数
+ 111          void Timer0Init(void);    //5微秒@12.000MHz
+ 112          void Timer1Init(void);    //1毫秒@12.000MHz
+ 113          void Frequency();         //频率测量显示函数
+ 114           
+ 115          void main()//主函数
+C51 COMPILER V9.59.0.0   MAIN                                                              12/13/2021 20:49:01 PAGE 3   
+
+ 116          {
+ 117            allinit();                  //初始化函数
+ 118            Timer0Init();
+ 119            Timer1Init();
+ 120            yi=1;er=2;san=3;si=4;wu=5;liu=6;qi=7;ba=8;//让数码管依次显示1~8，用来检验数码管显示函数程序是否有误
+ 121            while(1)
+ 122            {
+ 123              Frequency();              //频率测量显示函数
+ 124              display1(yi,er);          //第一、二段数码管函数
+ 125              display2(san,si);         //第三、四段数码管函数
+ 126              display3(wu,liu);         //第五、六段数码管函数
+ 127              display4(qi,ba);          //第七、八段数码管函数
+ 128            }
+ 129          }
+ 130          void Frequency()           //频率测量显示函数
+ 131          {
+ 132            yi=12;er=11;san=11;
+ 133            if(pinlv>=10000){si=pinlv/10000;wu=pinlv%10000/1000;liu=pinlv%1000/100;qi=pinlv%100/10;ba=pinlv%10;}
+ 134            else if(pinlv>=1000){si=11;wu=pinlv/1000;liu=pinlv%1000/100;qi=pinlv%100/10;ba=pinlv%10;}
+ 135            else if(pinlv>=100){si=11;wu=11;liu=pinlv/100;qi=pinlv%100/10;ba=pinlv%10;}
+ 136            else if(pinlv>=10){si=11;wu=11;liu=11;qi=pinlv/10;ba=pinlv%10;}
+ 137          }
+ 138          void Timer0Init(void)   //5微秒@12.000MHz
+ 139          {
+ 140            AUXR |= 0x80;   //定时器时钟1T模式
+ 141            TMOD &= 0xF0;   //设置定时器模式
+ 142            TL0 = 0xC4;   //设置定时初值
+ 143            TH0 = 0xFF;   //设置定时初值
+ 144            TF0 = 0;    //清除TF0标志
+ 145          //  TR0 = 1;    //定时器0开始计时
+ 146          }
+ 147          void time0() interrupt 1
+ 148          {
+ 149            if(P34==0)
+ 150            {
+ 151              fan++;
+ 152              if(flag==0)
+ 153              {
+ 154                flag=1;
+ 155                zheng_send=zheng;
+ 156                zheng=0;
+ 157              }
+ 158            }
+ 159            else if(P34==1)
+ 160            {
+ 161              zheng++;
+ 162              if(flag==1)
+ 163              {
+ 164                flag=0;
+ 165                fan_send=fan;
+ 166                fan=0;
+ 167              }
+ 168            }
+ 169          }
+ 170          void Timer1Init(void)   //1毫秒@12.000MHz
+ 171          {
+ 172            AUXR |= 0x40;   //定时器时钟1T模式
+ 173            TMOD &= 0x0F;   //设置定时器模式
+ 174            TL1 = 0x20;   //设置定时初值
+ 175            TH1 = 0xD1;   //设置定时初值
+ 176            TF1 = 0;    //清除TF1标志
+ 177            TR1 = 1;    //定时器1开始计时
+C51 COMPILER V9.59.0.0   MAIN                                                              12/13/2021 20:49:01 PAGE 4   
+
+ 178            EA=1;ET1=1;
+ 179          }
+ 180          void time1() interrupt 3
+ 181          {
+ 182            trie++;
+ 183            if(trie==969)
+ 184            {
+ 185              TR0 = 1;ET0=1;
+ 186            }
+ 187            else if(trie==999)
+ 188            {
+ 189              TR0 = 0;ET0=0;
+ 190              trie=0;
+ 191              time=(zheng_send+fan_send)*5;
+ 192              pinlv=1000000/time;
+ 193            }
+ 194          }
+ 195          void delayms(int ms)//延时函数
+ 196          {
+ 197            uint i,j;
+ 198            for(i=ms;i>0;i--)
+ 199              for(j=845;j>0;j--);
+ 200          }
+ 201          void allinit()//初始化函数
+ 202          {
+ 203            P2=0XA0;P0=0X00;      //关闭蜂鸣器继电器
+ 204            P2=0X80;P0=0XFF;      //关闭所有LED灯
+ 205            
+ 206            P2=0XC0;P0=0XFF;      //选中所有数码管段选
+ 207            P2=0XFF;P0=0XFF;      //关闭所有数码管
+ 208          }
+ 209          void display1(uchar yi,uchar er)//第一、二段数码管函数
+ 210          {
+ 211            P2=0XC0;P0=0X01;               //选中第一个数码管位选
+ 212            P2=0XFF;P0=tab[yi];            //让第一个数码管显示yi指向的值
+ 213            delayms(1);                    //延时1ms
+ 214            
+ 215            P2=0XC0;P0=0X02;               //选中第二个数码管位选
+ 216            P2=0XFF;P0=tab[er];            //让第一个数码管显示er指向的值
+ 217            delayms(1);                    //延时1ms
+ 218          }
+ 219          void display2(uchar san,uchar si)//第三、四段数码管函数
+ 220          {
+ 221            P2=0XC0;P0=0X04;               //选中第s三个数码管位选
+ 222            P2=0XFF;P0=tab[san];           //让第一个数码管显示san指向的值
+ 223            delayms(1);                    //延时1ms
+ 224            
+ 225            P2=0XC0;P0=0X08;               //选中第四个数码管位选
+ 226            P2=0XFF;P0=tab[si];            //让第一个数码管显示si指向的值
+ 227            delayms(1);                    //延时1ms
+ 228          }
+ 229          void display3(uchar wu,uchar liu)//第五、六段数码管函数
+ 230          {
+ 231            P2=0XC0;P0=0X10;               //选中第五个数码管位选
+ 232            P2=0XFF;P0=tab[wu];            //让第一个数码管显示wu指向的值
+ 233            delayms(1);                    //延时1ms
+ 234            
+ 235            P2=0XC0;P0=0X20;               //选中第六个数码管位选
+ 236            P2=0XFF;P0=tab[liu];           //让第一个数码管显示liu指向的值
+ 237            delayms(1);                    //延时1ms
+ 238          }
+ 239          void display4(uchar qi,uchar ba)//第七、八段数码管函数
+C51 COMPILER V9.59.0.0   MAIN                                                              12/13/2021 20:49:01 PAGE 5   
+
+ 240          {
+ 241            P2=0XC0;P0=0X40;               //选中第七个数码管位选
+ 242            P2=0XFF;P0=tab[qi];            //让第一个数码管显示qi指向的值
+ 243            delayms(1);                    //延时1ms
+ 244            
+ 245            P2=0XC0;P0=0X80;               //选中第八个数码管位选
+ 246            P2=0XFF;P0=tab[ba];            //让第一个数码管显示ba指向的值
+ 247            delayms(1);                    //延时1ms          
+ 248          
+ 249          }
+ 250          */
+ 251          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    371    ----
+   CONSTANT SIZE    =     18    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      5    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

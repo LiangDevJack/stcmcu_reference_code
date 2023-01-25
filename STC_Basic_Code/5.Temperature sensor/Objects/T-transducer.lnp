@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\T-transducer" 
+PRINT(".\Listings\T-transducer.m51") RAMSIZE(256) 

@@ -1,0 +1,411 @@
+C51 COMPILER V9.60.0.0   PWM                                                               12/13/2021 23:57:10 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PWM
+OBJECT MODULE PLACED IN .\Objects\PWM.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE PWM.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\PWM.l
+                    -st) TABS(2) OBJECT(.\Objects\PWM.obj)
+
+line level    source
+
+   1          /*#include<STC15F2K60S2.H>
+   2          sbit L1 = P0^0;
+   3          sbit S7 = P3^0;
+   4          unsigned char stat;
+   5          unsigned char pwm_duty;
+   6          unsigned char count;
+   7          void SelectHC573()
+   8          {
+   9            P2=(P2 & 0X1F) | 0X80;//0001 1111 | 1000 0000
+  10          }
+  11          void Delay(unsigned int t)
+  12          {
+  13            while(t--);
+  14          }
+  15          
+  16          void InitTimer0()
+  17          {
+  18            TMOD=0X01;
+  19            TH0=(65535-100)/256;
+  20            TL0=(65535-100)%256;
+  21            
+  22            ET0=1;
+  23            EA=1;
+  24          }
+  25          void ServiceTimer0() interrupt 1
+  26          {
+  27            TH0=(65535-100)/256;
+  28            TL0=(65535-100)%256;
+  29            
+  30            count++;
+  31            if(count==pwm_duty)
+  32            {
+  33              L1=1;
+  34            }
+  35            else if(count == 100)
+  36            {
+  37              L1=0;
+  38              count=0;
+  39            }
+  40          }
+  41          void ScanKeys()
+  42          {
+  43            if(S7 == 0)
+  44            {
+  45              Delay(100);
+  46              if(S7 == 0)
+  47              {
+  48                switch(stat)
+  49                {
+  50                  case 0:
+  51                    L1=0;
+  52                    TR0=1;
+  53                    pwm_duty=10;
+  54                    stat=1;
+C51 COMPILER V9.60.0.0   PWM                                                               12/13/2021 23:57:10 PAGE 2   
+
+  55                  break;
+  56                  
+  57                  case 1:
+  58                    pwm_duty=50;
+  59                    stat=2;
+  60                  break;
+  61                  
+  62                  case 2:
+  63                    pwm_duty=90;
+  64                    stat=3;
+  65                  break;
+  66                  
+  67                  case 3:
+  68                    L1=1;
+  69                    TR0=0;
+  70                    stat=0;
+  71                  break;
+  72                } 
+  73                  while(S7==0);
+  74              }
+  75            }
+  76          }
+  77          void main(void)
+  78          {
+  79            InitTimer0();
+  80            SelectHC573();
+  81            L1=1;
+  82            while(1)
+  83            {
+  84              ScanKeys();
+  85            }
+  86          }
+  87          */
+  88          /*
+  89          #include<STC15F2K60S2.H>
+  90          #include "absacc.h"
+  91           
+  92          sbit S7 = P3^0;
+  93          sbit S4 = P3^3;
+  94           
+  95          unsigned char pwm = 0;          
+  96          unsigned char pwm_duty = 0;              
+  97          unsigned char times = 0;        
+  98          unsigned char led_go = 0;       
+  99          unsigned char stat_go = 0;      
+ 100          unsigned char stat = 0;         
+ 101          unsigned char key_puse = 0;     
+ 102           
+ 103          unsigned char code SMG_duanma[18]=
+ 104              {0xc0,0xf9,0xa4,0xb0,0x99,0x92,0x82,0xf8,0x80,0x90,
+ 105               0x88,0x80,0xc6,0xc0,0x86,0x8e,0xbf,0x7f};
+ 106           
+ 107          void DelaySMG(unsigned int t)
+ 108          {
+ 109            while(t--);
+ 110          }
+ 111           
+ 112          void DisplaySMG_Bit(unsigned char pos, unsigned char value)
+ 113          {
+ 114            XBYTE[0xE000] = 0xff;
+ 115            XBYTE[0xC000] = 0x01 << pos;
+ 116            XBYTE[0xE000] = value;
+C51 COMPILER V9.60.0.0   PWM                                                               12/13/2021 23:57:10 PAGE 3   
+
+ 117          }
+ 118           
+ 119          void Display_Info(unsigned char pos, unsigned char duty)
+ 120          {
+ 121            DisplaySMG_Bit(0, SMG_duanma[pos]);
+ 122            DelaySMG(500);
+ 123           
+ 124            DelaySMG(500);
+ 125            DisplaySMG_Bit(6, SMG_duanma[duty / 10]);
+ 126            DelaySMG(500);
+ 127            DisplaySMG_Bit(7, SMG_duanma[duty % 10]); 
+ 128            DelaySMG(500);
+ 129            
+ 130            DisplaySMG_Bit(0, 0xff);
+ 131            DisplaySMG_Bit(6, 0xff);
+ 132            DisplaySMG_Bit(7, 0xff);
+ 133          }
+ 134           
+ 135          void Init_Timer0()
+ 136          {
+ 137            TMOD = 0x01;
+ 138            TH0 = (65535 - 1000) / 256;     
+ 139            TL0 = (65535 - 1000) % 256;
+ 140            
+ 141            ET0 = 1;
+ 142            EA = 1;
+ 143            TR0 = 1;
+ 144          }
+ 145           
+ 146          void Service_Timer0() interrupt 1
+ 147          {
+ 148            TH0 = (65535 - 1000) / 256;
+ 149            TL0 = (65535 - 1000) % 256;
+ 150            
+ 151            if(stat_go == 0)                  
+ 152                {
+ 153                  XBYTE[0x8000] = 0xe7;           
+ 154                  return;
+ 155                } 
+ 156            
+ 157                  pwm++;                
+ 158            
+ 159                if(pwm <= pwm_duty)   
+ 160                {
+ 161                  XBYTE[0x8000] = ~(0x01 << stat);
+ 162                }
+ 163                else if(pwm <= 10)
+ 164                {
+ 165                  XBYTE[0x8000] = 0xff;
+ 166                }
+ 167                else
+ 168                {
+ 169                  XBYTE[0x8000] = ~(0x01 << stat);
+ 170              
+ 171                  pwm = 0;
+ 172                  if(key_puse == 0)     
+ 173                  {
+ 174                    times++;
+ 175                  }
+ 176                }
+ 177          }
+ 178           
+C51 COMPILER V9.60.0.0   PWM                                                               12/13/2021 23:57:10 PAGE 4   
+
+ 179          void LED_Control()
+ 180          {
+ 181            if(times == 5)          
+ 182            {
+ 183              times = 0;
+ 184              if(led_go == 0)       
+ 185              {
+ 186                pwm_duty = pwm_duty + 1;
+ 187                if(pwm_duty == 11)
+ 188                {
+ 189                  pwm_duty = 10;
+ 190                  led_go = 1;
+ 191                }
+ 192              }
+ 193              else if(led_go == 1)  
+ 194              {
+ 195                pwm_duty = pwm_duty - 1;
+ 196                if(pwm_duty == 255)
+ 197                {
+ 198                  pwm_duty = 0;
+ 199                  led_go = 0;
+ 200                  
+ 201                  if(stat_go == 1)      
+ 202                  {
+ 203                    stat++;
+ 204                    if(stat == 8)
+ 205                    {
+ 206                      stat = 0;
+ 207                    }
+ 208                  }
+ 209                  else if(stat_go == 2) 
+ 210                  {
+ 211                    stat--;
+ 212                    if(stat == 255)
+ 213                    {
+ 214                      stat = 7;
+ 215                    }
+ 216                  }
+ 217                }
+ 218              }
+ 219            }
+ 220          }
+ 221           
+ 222          void Scan_Keys()
+ 223          {
+ 224            if(S4 == 0)
+ 225            {
+ 226              DelaySMG(100);
+ 227              if(S4 == 0)
+ 228              {
+ 229                while(S4 == 0)
+ 230                {
+ 231                  key_puse = 1;
+ 232                }
+ 233                key_puse = 0;
+ 234                
+ 235                stat_go++;            
+ 236                if(stat_go == 3)
+ 237                {
+ 238                  stat_go = 1;
+ 239                }
+ 240              }
+C51 COMPILER V9.60.0.0   PWM                                                               12/13/2021 23:57:10 PAGE 5   
+
+ 241            }
+ 242            
+ 243            if(S7 == 0)
+ 244            {
+ 245              DelaySMG(100);
+ 246              if(S7 == 0)
+ 247              {
+ 248                while(S7 == 0)
+ 249                {
+ 250                  key_puse = 1;
+ 251                  Display_Info(stat + 1, pwm_duty * 10);
+ 252                }
+ 253                key_puse = 0;
+ 254              }
+ 255            }
+ 256          }
+ 257           
+ 258          void Init_System()
+ 259          {
+ 260            XBYTE[0xA000] = 0xff;
+ 261            XBYTE[0xA000] = 0x00;
+ 262            XBYTE[0xE000] = 0xff;
+ 263            XBYTE[0xC000] = 0xff;
+ 264            
+ 265            Init_Timer0();
+ 266          }
+ 267           
+ 268          main()
+ 269          {
+ 270            Init_System();
+ 271            while(1)
+ 272            {
+ 273              LED_Control();
+ 274              Scan_Keys();
+ 275            }
+ 276          }
+ 277          */
+ 278          
+ 279          //按下S7灯会变亮
+ 280          #include<STC15F2K60S2.H>
+ 281          sbit L1 = P0^0;
+ 282          sbit S7 = P3^0;
+ 283          unsigned char stat;
+ 284          unsigned char pwm_duty;
+ 285          unsigned char count;
+ 286          void SelectHC573()
+ 287          {
+ 288   1        P2=(P2 & 0X1F) | 0X80;//0001 1111 | 1000 0000
+ 289   1      }
+ 290          void Delay(unsigned int t)
+ 291          {
+ 292   1        while(t--);
+ 293   1      }
+ 294          
+ 295          
+ 296          void Timer0Init(void)   //100微秒@11.0592MHz
+ 297          {
+ 298   1        AUXR |= 0x80;   //定时器时钟1T模式
+ 299   1        TMOD &= 0xF0;   //设置定时器模式
+ 300   1        TL0 = 0xAE;   //设置定时初值
+ 301   1        TH0 = 0xFB;   //设置定时初值
+ 302   1        TF0 = 0;    //清除TF0标志
+C51 COMPILER V9.60.0.0   PWM                                                               12/13/2021 23:57:10 PAGE 6   
+
+ 303   1        
+ 304   1        ET0=1;
+ 305   1        EA=1;
+ 306   1      
+ 307   1      }
+ 308          
+ 309          void ServiceTimer0() interrupt 1
+ 310          {
+ 311   1        TL0 = 0xAE;   //设置定时初值
+ 312   1        TH0 = 0xFB;   //设置定时初值
+ 313   1        
+ 314   1        count++;
+ 315   1        if(count==pwm_duty)
+ 316   1        {
+ 317   2          L1=1;
+ 318   2        }
+ 319   1        else if(count == 100)
+ 320   1        {
+ 321   2          L1=0;
+ 322   2          count=0;
+ 323   2        }
+ 324   1      }
+ 325          void ScanKeys()
+ 326          {
+ 327   1        if(S7 == 0)
+ 328   1        {
+ 329   2          Delay(100);
+ 330   2          if(S7 == 0)
+ 331   2          {
+ 332   3            switch(stat)
+ 333   3            {
+ 334   4              case 0:
+ 335   4                L1=0;
+ 336   4                TR0=1;
+ 337   4                pwm_duty=10;
+ 338   4                stat=1;
+ 339   4              break;
+ 340   4              
+ 341   4              case 1:
+ 342   4                pwm_duty=50;
+ 343   4                stat=2;
+ 344   4              break;
+ 345   4              
+ 346   4              case 2:
+ 347   4                pwm_duty=90;
+ 348   4                stat=3;
+ 349   4              break;
+ 350   4              
+ 351   4              case 3:
+ 352   4                L1=1;
+ 353   4                TR0=0;
+ 354   4                stat=0;
+ 355   4              break;
+ 356   4            } 
+ 357   3              while(S7==0);
+ 358   3          }
+ 359   2        }
+ 360   1      }
+ 361          void main(void)
+ 362          {
+ 363   1        Timer0Init();
+ 364   1        SelectHC573();
+C51 COMPILER V9.60.0.0   PWM                                                               12/13/2021 23:57:10 PAGE 7   
+
+ 365   1        L1=1;
+ 366   1        while(1)
+ 367   1        {
+ 368   2          ScanKeys();
+ 369   2        }
+ 370   1      }
+ 371          
+ 372          
+ 373          
+ 374          
+ 375          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    155    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

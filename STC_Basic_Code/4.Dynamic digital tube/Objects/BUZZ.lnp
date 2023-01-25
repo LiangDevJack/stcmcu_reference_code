@@ -1,0 +1,4 @@
+".\Objects\main.obj",
+".\Objects\Template.obj" 
+TO ".\Objects\BUZZ" 
+PRINT(".\Listings\BUZZ.m51") RAMSIZE(256) 

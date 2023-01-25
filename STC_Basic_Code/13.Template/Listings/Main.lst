@@ -1,0 +1,298 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              12/07/2021 22:48:08 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\Main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE Main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\Main
+                    -.lst) TABS(2) OBJECT(.\Objects\Main.obj)
+
+line level    source
+
+   1          
+   2          #include <stc15.h>
+   3          #include <intrins.h>
+   4          #include <Onewire.h>
+   5          #include <IIC.h>
+   6          #include <DS1302.h>
+   7          
+   8          unsigned char LED_Bit=0XFF;
+   9          unsigned char Actuator_Bit=0X00;
+  10          
+  11          #define LEDx_ON(n)  {LED_Bit&=_crol_(0XFE,n-1); P0=LED_Bit; P2|=0X80; P2&=0X9F; P2&=0X1F;}
+  12          #define LEDx_OFF(n) {LED_Bit|=_crol_(0X01,n-1); P0=LED_Bit; P2|=0X80; P2&=0X9F; P2&=0X1F;}
+  13          
+  14          #define Buzzer_ON   Actuator_Bit|=0x40; P0=Actuator_Bit;P2|=0XA0;P2&=0XBF; P2&=0X1F;
+  15          #define Buzzer_OFF  Actuator_Bit&=0XBF; P0=Actuator_Bit;P2|=0XA0;P2&=0XBF; P2&=0X1F;
+  16          #define Relay_ON    Actuator_Bit|=0x10; P0=Actuator_Bit;P2|=0XA0;P2&=0XBF; P2&=0X1F;
+  17          #define Relay_OFF   Actuator_Bit&=0XEF; P0=Actuator_Bit;P2|=0XA0;P2&=0XBF; P2&=0X1F;
+  18          
+  19          //unsigned char tab[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,0XBF,0XFF};
+  20          unsigned char code tab[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,\
+  21                                    0X40,0X79,0X24,0X30,0X19,0X12,0X02,0X78,0X00,0X10,\
+  22                                    0XBF,0XFF,0X8C,0XC1};
+  23          unsigned char KEY_Value=0;
+  24          unsigned char DigCom=0;
+  25          unsigned char DigBuf[8] = {21,21,21,21,21,21,21,21};
+  26          
+  27          unsigned char LED=1;
+  28          unsigned int LED_tt =0;
+  29          bit LED_Ref =0;
+  30          
+  31          unsigned int SEG_tt =0;
+  32          bit SEG_Ref =0;
+  33          bit SEG_Run = 0 ;
+  34          
+  35          
+  36          unsigned int Temp_tt =0;
+  37          bit Temp_Ref =0;
+  38          unsigned int Temper = 0 ;
+  39          unsigned char Temp_Vaue = 0 ;
+  40          unsigned long Temp_DotValue = 0 ;
+  41          
+  42          
+  43          unsigned int AD_VALUE=0;
+  44          unsigned int AD_tt =0;
+  45          bit AD_Ref =0;
+  46          
+  47          unsigned char SEG_Show=1;
+  48          
+  49          unsigned int DS_tt =0;
+  50          bit DS_Ref =0;
+  51          extern unsigned char Get_Time[7];
+  52          extern unsigned char shijian[7];
+  53          
+  54          unsigned int Num = 800;
+C51 COMPILER V9.59.0.0   MAIN                                                              12/07/2021 22:48:08 PAGE 2   
+
+  55          
+  56          unsigned char Temper_para=25;
+  57          unsigned int AD_para=250;
+  58          unsigned char Para_Ch=0;
+  59          
+  60          
+  61          void Delay_MS(unsigned int MS);
+  62          void KeyScan(void);
+  63          void ALL_Init(void);
+  64          void Timer0Init(void);    //1毫秒@11.0592MHz
+  65          void SEG_Display(void);
+  66          
+  67          void main(void)
+  68          {
+  69   1        ALL_Init(); 
+  70   1        Timer0Init();
+  71   1        EA=1;ET0=1;
+  72   1        
+  73   1        Buzzer_ON;Delay_MS(500);  Buzzer_OFF;Delay_MS(500);
+  74   1        Buzzer_ON;Delay_MS(500);  Buzzer_OFF;Delay_MS(500);
+  75   1        Buzzer_ON;Delay_MS(500);  Buzzer_OFF;Delay_MS(500);   
+  76   1        
+  77   1        
+  78   1        DigBuf[0]=2;DigBuf[1]=1;DigBuf[2]=20;DigBuf[3]=1;DigBuf[4]=2;DigBuf[5]=20;DigBuf[6]=1;DigBuf[7]=2;
+  79   1        Delay_MS(1000);
+  80   1        
+  81   1        DS_init();
+  82   1        
+  83   1        while(1)
+  84   1        {   
+  85   2          if(Temp_Ref==1)
+  86   2          {
+  87   3            Temp_Ref=0;;
+  88   3            Temp_Vaue=Temp_get()>>4;
+  89   3          }
+  90   2          
+  91   2          if(AD_Ref==1)
+  92   2          {
+  93   3            AD_Ref=0;
+  94   3            AD_VALUE=AD_read(0X03);
+  95   3            AD_VALUE=AD_VALUE*1.96;
+  96   3          }   
+  97   2          
+  98   2          if(DS_Ref==1)
+  99   2          {
+ 100   3            DS_Ref=0;
+ 101   3            DS_get();
+ 102   3          }
+ 103   2          
+ 104   2          if(SEG_Ref==1)
+ 105   2          {
+ 106   3            SEG_Ref=0;
+ 107   3            SEG_Display();
+ 108   3          } 
+ 109   2          
+ 110   2          KeyScan();
+ 111   2          if(KEY_Value==7)
+ 112   2          {
+ 113   3            KEY_Value=0;
+ 114   3            if(SEG_Show==1)SEG_Show=2;
+ 115   3            else if(SEG_Show==2)SEG_Show=3;
+ 116   3            else if(SEG_Show==3)SEG_Show=1;     
+C51 COMPILER V9.59.0.0   MAIN                                                              12/07/2021 22:48:08 PAGE 3   
+
+ 117   3          }
+ 118   2          if(KEY_Value==6)
+ 119   2          {
+ 120   3            KEY_Value=0;
+ 121   3            if((Para_Ch==0)&&(SEG_Show==3))Para_Ch=1;
+ 122   3            else if((Para_Ch==1)&&(SEG_Show==3))Para_Ch=2;
+ 123   3            else if((Para_Ch==2)&&(SEG_Show==3))Para_Ch=0;
+ 124   3          }
+ 125   2          if(KEY_Value==5)
+ 126   2          {
+ 127   3            KEY_Value=0;
+ 128   3            if(Para_Ch==1)Temper_para=Temper_para+1;
+ 129   3            else if(Para_Ch==2)AD_para=AD_para+50;
+ 130   3          }     
+ 131   2          if(KEY_Value==4)
+ 132   2            {
+ 133   3            KEY_Value=0;
+ 134   3            if(Para_Ch==1)Temper_para=Temper_para-1;
+ 135   3            else if(Para_Ch==2)
+ 136   3            {
+ 137   4              if(AD_para>=50)
+ 138   4              {
+ 139   5                AD_para=AD_para-50;
+ 140   5              }
+ 141   4              else 
+ 142   4              {
+ 143   5                AD_para=50;
+ 144   5              }
+ 145   4            }
+ 146   3          }
+ 147   2        }
+ 148   1      }
+ 149          
+ 150          void Timer0(void) interrupt 1
+ 151          {
+ 152   1        P0=0XFF;              //选中第一个数码管
+ 153   1        P2|=0XC0;//打开位选573   U8   //    XXXX XXXX | 1100 0000 = 11XX XXXX
+ 154   1        P2&=0XDF;                     //    11XX XXXX & 1101 1111 = 110X XXXX
+ 155   1        P2&=0X1F;
+ 156   1        P0=0XFF;        //输入数码管要显示的码值
+ 157   1        P2|=0XE0;                     //    XXXX XXXX | 1110 0000 = 111X XXXX
+ 158   1        P2&=0XFF;//打开段选573   U7   //    111X XXXX & 1111 1111 = 111X XXXX
+ 159   1        P2&=0X1F;
+ 160   1        
+ 161   1        P0=(0X01<<DigCom);              //选中第一个数码管
+ 162   1        P2|=0XC0;//打开位选573   U8   //    XXXX XXXX | 1100 0000 = 11XX XXXX
+ 163   1        P2&=0XDF;                     //    11XX XXXX & 1101 1111 = 110X XXXX
+ 164   1        P2&=0X1F;
+ 165   1        P0=tab[DigBuf[DigCom]];         //输入数码管要显示的码值
+ 166   1        P2|=0XE0;                     //    XXXX XXXX | 1110 0000 = 111X XXXX
+ 167   1        P2&=0XFF;//打开段选573   U7   //    111X XXXX & 1111 1111 = 111X XXXX
+ 168   1        P2&=0X1F;
+ 169   1        if(++DigCom==8)DigCom=0;
+ 170   1        
+ 171   1        LED_tt++;
+ 172   1        if(LED_tt==999){LED_tt=0;LED_Ref=1;}
+ 173   1        
+ 174   1        SEG_tt++;
+ 175   1        if(SEG_tt==199){SEG_tt=0;SEG_Ref=1;}
+ 176   1        
+ 177   1        Temp_tt++;
+ 178   1        if(Temp_tt==799){Temp_tt=0;Temp_Ref=1;}
+C51 COMPILER V9.59.0.0   MAIN                                                              12/07/2021 22:48:08 PAGE 4   
+
+ 179   1          
+ 180   1        AD_tt++;
+ 181   1        if(AD_tt==299){AD_tt=0;AD_Ref=1;}
+ 182   1        
+ 183   1        DS_tt++;
+ 184   1        if(DS_tt==999){DS_tt=0;DS_Ref=1;}
+ 185   1        
+ 186   1        
+ 187   1        
+ 188   1        
+ 189   1      }
+ 190          
+ 191          
+ 192          
+ 193          void SEG_Display(void)
+ 194          {
+ 195   1          if(SEG_Show==1)
+ 196   1          {
+ 197   2            DigBuf[0]=Temp_Vaue/10;DigBuf[1]=Temp_Vaue%10;DigBuf[2]=21;DigBuf[3]=21;DigBuf[4]=21;
+ 198   2            DigBuf[5]=AD_VALUE/100+10;DigBuf[6]=AD_VALUE%100/10;DigBuf[7]=AD_VALUE%10;        
+ 199   2          }
+ 200   1          else if(SEG_Show==2)
+ 201   1          {
+ 202   2            DigBuf[0] = Get_Time[2]/10; DigBuf[1] = Get_Time[2]%10; DigBuf[2] = 20;
+ 203   2            DigBuf[3] = Get_Time[1]/10; DigBuf[4] = Get_Time[1]%10; DigBuf[5] = 20;
+ 204   2            DigBuf[6] = Get_Time[0]/10; DigBuf[7] = Get_Time[0]%10;           
+ 205   2          }
+ 206   1          else if(SEG_Show==3)
+ 207   1          {
+ 208   2            DigBuf[0]=22;DigBuf[1]=Temper_para/10;;DigBuf[2]=Temper_para%10;DigBuf[3]=21;
+ 209   2            DigBuf[4]=23;DigBuf[5]=AD_para/100+10;DigBuf[6]=AD_para%100/10;DigBuf[7]=AD_para%10;              
+ 210   2          }
+ 211   1      }
+ 212          
+ 213          
+ 214          void Timer0Init(void)   //1毫秒@11.0592MHz
+ 215          {
+ 216   1        AUXR |= 0x80;   //定时器时钟1T模式   XXXX XXXX | 1000 0000  = 1XXX XXXX
+ 217   1        TMOD &= 0xF0;   //设置定时器模式     XXXX XXXX & 1111 0000  = XXXX 0000 
+ 218   1        TL0 = 0xCD;   //设置定时初始值      
+ 219   1        TH0 = 0xD4;   //设置定时初始值      // 11.0592MHZ  11059200
+ 220   1        TF0 = 0;    //清除TF0标志
+ 221   1        TR0 = 1;    //定时器0开始计时
+ 222   1      }
+ 223          
+ 224          void KeyScan(void)
+ 225          {
+ 226   1        if(P30==0)
+ 227   1        {
+ 228   2          Delay_MS(10);
+ 229   2          if(P30==0)KEY_Value=7;//P0=tab[1];
+ 230   2          while(!P30);
+ 231   2        }
+ 232   1        else if(P31==0)
+ 233   1        {
+ 234   2          Delay_MS(10);
+ 235   2          if(P31==0)KEY_Value=6;
+ 236   2          while(!P31);
+ 237   2        } 
+ 238   1        else if(P32==0)
+ 239   1        {
+ 240   2          Delay_MS(10);
+C51 COMPILER V9.59.0.0   MAIN                                                              12/07/2021 22:48:08 PAGE 5   
+
+ 241   2          if(P32==0)KEY_Value=5;
+ 242   2          while(!P32);
+ 243   2        } 
+ 244   1        else if(P33==0)
+ 245   1        {
+ 246   2          Delay_MS(10);
+ 247   2          if(P33==0)KEY_Value=4;
+ 248   2          while(!P33);
+ 249   2        } 
+ 250   1      }
+ 251          
+ 252          void ALL_Init(void)
+ 253          {
+ 254   1        P0=0X00;  P2|=0XA0; P2&=0XBF; P2&=0X1F;
+ 255   1        P0=0XFF;  P2|=0X80; P2&=0X9F; P2&=0X1F;
+ 256   1        
+ 257   1        P0=0XFF;  P2|=0XC0; P2&=0XDF; P2&=0X1F;
+ 258   1        P0=0xFF;  P2|=0XE0; P2&=0XFF; P2&=0X1F;
+ 259   1      }
+ 260          
+ 261          void Delay_MS(unsigned int MS)
+ 262          {
+ 263   1        unsigned int i,j;
+ 264   1        for(i=0;i<MS;i++)
+ 265   1          for(j=845;j>0;j--);
+ 266   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    997    ----
+   CONSTANT SIZE    =     24    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     39    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      6    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,128 @@
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                    08/12/2021  00:01:56  PAGE 1
+
+
+BL51 BANKED LINKER/LOCATER V6.22.2.0, INVOKED BY:
+C:\KEIL_V5\C51\BIN\BL51.EXE .\Objects\main.obj, .\Objects\Practice Assignment.obj TO .\Objects\LED PRINT (.\Listings\LED
+>> .m51) RAMSIZE (256)
+
+
+MEMORY MODEL: SMALL
+
+
+INPUT MODULES INCLUDED:
+  .\Objects\main.obj (MAIN)
+  .\Objects\Practice Assignment.obj (PRACTICE_ASSIGNMENT)
+  C:\KEIL_V5\C51\LIB\C51S.LIB (?C_STARTUP)
+
+
+LINK MAP OF MODULE:  .\Objects\LED (MAIN)
+
+
+            TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
+            -----------------------------------------------------
+
+            * * * * * * *   D A T A   M E M O R Y   * * * * * * *
+            REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
+            DATA    0008H     0003H     UNIT         ?DT?PRACTICE_ASSIGNMENT
+            IDATA   000BH     0001H     UNIT         ?STACK
+
+            * * * * * * *   C O D E   M E M O R Y   * * * * * * *
+            CODE    0000H     0003H     ABSOLUTE     
+            CODE    0003H     0076H     UNIT         ?PR?MAIN?PRACTICE_ASSIGNMENT
+            CODE    0079H     002CH     UNIT         ?PR?_DELAYMS?PRACTICE_ASSIGNMENT
+            CODE    00A5H     000CH     UNIT         ?C_C51STARTUP
+
+
+
+OVERLAY MAP OF MODULE:   .\Objects\LED (MAIN)
+
+
+SEGMENT
+  +--> CALLED SEGMENT
+---------------------
+?C_C51STARTUP
+  +--> ?PR?MAIN?PRACTICE_ASSIGNMENT
+
+?PR?MAIN?PRACTICE_ASSIGNMENT
+  +--> ?PR?_DELAYMS?PRACTICE_ASSIGNMENT
+
+
+
+SYMBOL TABLE OF MODULE:  .\Objects\LED (MAIN)
+
+  VALUE           TYPE          NAME
+  ----------------------------------
+
+  -------         MODULE        MAIN
+  C:0000H         SYMBOL        _ICE_DUMMY_
+  -------         ENDMOD        MAIN
+
+  -------         MODULE        PRACTICE_ASSIGNMENT
+  C:0000H         SYMBOL        _ICE_DUMMY_
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/12/2021  00:01:56  PAGE 2
+
+
+  D:0080H         PUBLIC        P0
+  D:0090H         PUBLIC        P1
+  D:00A0H         PUBLIC        P2
+  D:00B0H         PUBLIC        P3
+  D:00C0H         PUBLIC        P4
+  D:00C8H         PUBLIC        P5
+  D:00E8H         PUBLIC        P6
+  D:0008H         PUBLIC        LED1
+  D:00F8H         PUBLIC        P7
+  D:0009H         PUBLIC        LED2
+  D:000AH         PUBLIC        LED3
+  D:00A8H         PUBLIC        IE
+  D:00B8H         PUBLIC        IP
+  D:00D8H         PUBLIC        CCON
+  C:0003H         PUBLIC        main
+  D:0098H         PUBLIC        SCON
+  D:0088H         PUBLIC        TCON
+  C:0080H         PUBLIC        _Delayms
+  D:00D0H         PUBLIC        PSW
+  -------         PROC          MAIN
+  C:0003H         LINE#         52
+  C:0003H         LINE#         53
+  C:0003H         LINE#         54
+  C:000FH         LINE#         55
+  C:000FH         LINE#         56
+  C:000FH         LINE#         57
+  C:001DH         LINE#         58
+  C:001DH         LINE#         59
+  C:002AH         LINE#         60
+  C:002DH         LINE#         61
+  C:0031H         LINE#         62
+  C:003FH         LINE#         63
+  C:003FH         LINE#         64
+  C:004CH         LINE#         65
+  C:004FH         LINE#         66
+  C:0053H         LINE#         67
+  C:0061H         LINE#         68
+  C:0061H         LINE#         69
+  C:0064H         LINE#         70
+  C:006BH         LINE#         71
+  C:006EH         LINE#         72
+  C:0075H         LINE#         73
+  -------         ENDPROC       MAIN
+  -------         PROC          L?0026
+  -------         ENDPROC       L?0026
+  -------         PROC          _DELAYMS
+  D:0006H         SYMBOL        ms
+  -------         DO            
+  D:0004H         SYMBOL        i
+  D:0002H         SYMBOL        j
+  -------         ENDDO         
+  C:0080H         LINE#         77
+  C:0080H         LINE#         78
+  C:0080H         LINE#         80
+  C:0090H         LINE#         81
+  C:00A4H         LINE#         82
+  -------         ENDPROC       _DELAYMS
+BL51 BANKED LINKER/LOCATER V6.22.2.0                                                  08/12/2021  00:01:56  PAGE 3
+
+
+  -------         ENDMOD        PRACTICE_ASSIGNMENT
+
+Program Size: data=12.0 xdata=0 code=177
+LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)

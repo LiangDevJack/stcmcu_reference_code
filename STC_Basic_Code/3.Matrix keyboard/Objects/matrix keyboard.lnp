@@ -1,0 +1,5 @@
+".\Objects\main.obj",
+".\Objects\Time.obj",
+".\Objects\Practice Assignment.obj" 
+TO ".\Objects\matrix keyboard" 
+PRINT(".\Listings\matrix keyboard.m51") RAMSIZE(256) 

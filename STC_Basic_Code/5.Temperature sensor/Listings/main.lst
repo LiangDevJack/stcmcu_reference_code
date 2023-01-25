@@ -1,0 +1,290 @@
+C51 COMPILER V9.60.0.0   MAIN                                                              12/24/2021 15:40:58 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<STC15F2K60S2.H>
+   2          #include<INTRINS.H>
+   3          
+   4          #define uchar unsigned char
+   5          #define uint unsigned char
+   6          uchar tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,\
+   7                        0X40,0X79,0X24,0X30,0X19,0X12,0X02,0X78,0X00,0X10,0XBF,0XFF};
+   8          uchar yi,er,san,si,wu,liu,qi,ba;
+   9          void Display1(yi,er);
+  10          void Display2(san,si);
+  11          void Display3(wu,liu);
+  12          void Display4(qi,ba);
+  13          void Allinit (void);
+  14          sbit DQ=P1^4;
+  15          void Delayms(int ms);
+  16          uchar num;
+  17          uchar tt;
+  18          long wendu;
+  19          unsigned char DS18B20_ReadByte(void);
+  20          void Init_DS18b20(void);
+  21          long TemperGet(void);
+  22          void DS18b20_WriteByte(unsigned char dat);
+  23          void Delay500us();
+  24          void Delay80us();
+  25          
+  26          void main (void)
+  27          {
+  28   1        Allinit();
+  29   1        yi=21;er=21;san=21;si=21;wu=21;liu=21;qi=21;ba=21;
+  30   1        Init_DS18b20();         
+  31   1        DS18b20_WriteByte(0XCC);
+  32   1        DS18b20_WriteByte(0X44);
+  33   1          
+  34   1        while(1)
+  35   1        {
+  36   2      
+  37   2            wendu=TemperGet();//211625
+  38   2            yi=wendu/100000;er=wendu%100000/10000+10;
+  39   2            san=wendu%10000/1000;si=wendu%1000/100;wu=wendu%100/10;liu=wendu%10;
+  40   2            if(wendu<=300000)
+  41   2            {
+  42   3              P2=0XA0;
+  43   3              P0=0X00;
+  44   3              P2=0X80;
+  45   3              P0=0XFE;
+  46   3            
+  47   3             }
+  48   2            else 
+  49   2            {
+  50   3              P2=0X80;
+  51   3              P0=0XFF;
+  52   3              P2=0XA0;
+  53   3              P0=0XEF;
+  54   3            }
+C51 COMPILER V9.60.0.0   MAIN                                                              12/24/2021 15:40:58 PAGE 2   
+
+  55   2            Display1(yi,er);
+  56   2            Display2(san,si);
+  57   2            Display3(wu,liu);
+  58   2            Display4(qi,ba);
+  59   2        }
+  60   1      }
+  61          
+  62          
+  63          void Init_DS18b20(void)//初始化
+  64          {
+  65   1        DQ=0;//拉低
+  66   1        Delay500us();
+  67   1        DQ=1;//拉高
+  68   1        Delay500us();
+  69   1      }
+  70          void DS18b20_WriteByte(unsigned char dat)
+  71          {
+  72   1        unsigned char i;
+  73   1        for(i=0;i<8;i++)
+  74   1        {
+  75   2          DQ=0;//拉低
+  76   2          DQ=dat&0X01;//1100 1100 & 0000 0001 =0000 0000
+  77   2          Delay80us();
+  78   2          DQ=1;
+  79   2          dat >>=1;
+  80   2          
+  81   2        }
+  82   1      }
+  83          unsigned char DS18b20_ReadByte(void)
+  84          {
+  85   1        unsigned char i;
+  86   1        unsigned char dat;
+  87   1        
+  88   1        for(i=0;i<8;i++)
+  89   1        {
+  90   2          DQ=0;
+  91   2          dat >>=1;
+  92   2          DQ=1;
+  93   2          if(DQ==1)
+  94   2          {
+  95   3            dat=dat|0X80;
+  96   3          }
+  97   2          Delay80us();
+  98   2        }
+  99   1      
+ 100   1        return dat;
+ 101   1      
+ 102   1      }
+ 103          
+ 104          long TemperGet(void)
+ 105          {
+ 106   1        unsigned char low,high;
+ 107   1        long temp;
+ 108   1        Init_DS18b20();         //初始化
+ 109   1        DS18b20_WriteByte(0XCC);//忽略ROM指令
+ 110   1        DS18b20_WriteByte(0X44);//温度转换指令
+ 111   1        Delay500us();
+ 112   1        
+ 113   1        Init_DS18b20();         
+ 114   1        DS18b20_WriteByte(0XCC);
+ 115   1        DS18b20_WriteByte(0XBE);//读暂存器指令
+ 116   1        
+C51 COMPILER V9.60.0.0   MAIN                                                              12/24/2021 15:40:58 PAGE 3   
+
+ 117   1        low=DS18b20_ReadByte();
+ 118   1        high=DS18b20_ReadByte();
+ 119   1      //  temp=high<<4;   //0000 1010 ; 1010 0000 
+ 120   1      //  temp=temp|(low>>4);   //1010 0110 ; 0000 1010
+ 121   1        temp=high&0X0F;
+ 122   1        temp<<=8;
+ 123   1        temp=temp|low;
+ 124   1        temp=temp*625;
+ 125   1          
+ 126   1        return temp;
+ 127   1      }
+ 128          void Delay500us()   //@11.0592MHz
+ 129          {
+ 130   1        unsigned char i, j;
+ 131   1      
+ 132   1        _nop_();
+ 133   1        _nop_();
+ 134   1        i = 6;
+ 135   1        j = 93;
+ 136   1        do
+ 137   1        {
+ 138   2          while (--j);
+ 139   2        } while (--i);
+ 140   1      }
+ 141          void Delay80us()    //@11.0592MHz
+ 142          {
+ 143   1        unsigned char i, j;
+ 144   1      
+ 145   1        _nop_();
+ 146   1        i = 1;
+ 147   1        j = 217;
+ 148   1        do
+ 149   1        {
+ 150   2          while (--j);
+ 151   2        } while (--i);
+ 152   1      }
+ 153          
+ 154          
+ 155          
+ 156          
+ 157          void Display1(yi,er)//数码管
+ 158          {
+ 159   1        P2=0XC0;
+ 160   1        P0=0X01;//0000 0001
+ 161   1        P2=0XE0;
+ 162   1        P0=tap[yi];
+ 163   1        Delayms(1);
+ 164   1        
+ 165   1        P2=0XC0;
+ 166   1        P0=0X02;
+ 167   1        P2=0XE0;
+ 168   1        P0=tap[er];
+ 169   1        Delayms(1);
+ 170   1      }
+ 171          void Delayms (int ms)
+ 172          {
+ 173   1        int i,j;
+ 174   1        for(i=0;i<ms;i++)
+ 175   1          for(j=845;j>0;j--);
+ 176   1      }
+ 177          void Display2(san,si)
+ 178          {
+C51 COMPILER V9.60.0.0   MAIN                                                              12/24/2021 15:40:58 PAGE 4   
+
+ 179   1        P2=0XC0;
+ 180   1        P0=0X04;
+ 181   1        P2=0XE0;
+ 182   1        P0=tap[san];
+ 183   1        Delayms(1);
+ 184   1        
+ 185   1        P2=0XC0;
+ 186   1        P0=0X08;
+ 187   1        P2=0XE0;
+ 188   1        P0=tap[si];
+ 189   1        Delayms(1);
+ 190   1      }
+ 191          void Display3(wu,liu)
+ 192          {
+ 193   1        P2=0XC0;
+ 194   1        P0=0X10;
+ 195   1        P2=0XE0;
+ 196   1        P0=tap[wu];
+ 197   1        Delayms(1);
+ 198   1        
+ 199   1        P2=0XC0;
+ 200   1        P0=0X20;
+ 201   1        P2=0XE0;
+ 202   1        P0=tap[liu];
+ 203   1        Delayms(1);
+ 204   1      }
+ 205          void Display4(qi,ba)
+ 206          {
+ 207   1        P2=0XC0;
+ 208   1        P0=0X40;//0100 0000
+ 209   1        P2=0XE0;
+ 210   1        P0=tap[qi];
+ 211   1        Delayms(1);
+ 212   1        
+ 213   1        P2=0XC0;
+ 214   1        P0=0X80;
+ 215   1        P2=0XE0;
+ 216   1        P0=tap[ba];
+ 217   1        Delayms(1);
+ 218   1      }
+ 219          
+ 220          void Allinit(void)
+ 221          {
+ 222   1        P2=0XA0;//打开控制蜂鸣器的573
+ 223   1        P0=0X00;//关闭蜂鸣器继电器
+ 224   1        
+ 225   1        P2=0XC0;//打开控制数码管的位选573
+ 226   1        P0=0XFF;//选中所有的数码管
+ 227   1        P2=0XE0;//打开控制数码管段选573
+ 228   1        P0=0XFF;//关闭所有数码管
+ 229   1        
+ 230   1        P2=0X80;//打开控制LED灯的573
+ 231   1        P0=0XFF;//关闭所有LED灯
+ 232   1      }
+ 233          //bit Init_DS18b20(void)
+ 234          //{
+ 235          //  bit DS=0;
+ 236          //  DQ=0;
+ 237          //  Delay500us();
+ 238          //  DQ=1;
+ 239          //  Delay100us();
+ 240          //  DS=DQ;
+C51 COMPILER V9.60.0.0   MAIN                                                              12/24/2021 15:40:58 PAGE 5   
+
+ 241          //  Delay100us();
+ 242          //  
+ 243          //  return DS;
+ 244          //}
+ 245          
+ 246          
+ 247          
+ 248          
+ 249          
+ 250          
+ 251          
+ 252          
+ 253          
+ 254          
+ 255          
+ 256          
+ 257          
+ 258          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    771    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     36      11
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

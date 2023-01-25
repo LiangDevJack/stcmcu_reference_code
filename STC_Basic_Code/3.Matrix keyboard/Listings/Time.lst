@@ -1,0 +1,362 @@
+C51 COMPILER V9.60.0.0   TIME                                                              11/23/2022 16:58:20 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE TIME
+OBJECT MODULE PLACED IN .\Objects\Time.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE Time.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\Time
+                    -.lst) TABS(2) OBJECT(.\Objects\Time.obj)
+
+line level    source
+
+   1          //定时器
+   2          /*#include<STC15F2K60S2.H>
+   3          
+   4          unsigned char tt;
+   5          
+   6          void main (void)
+   7          {
+   8            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+   9              
+  10            
+  11            AUXR=0X80;
+  12            TMOD=0XF0;
+  13            TH0=0X28;
+  14            TL0=0X00;
+  15            TF0=0;
+  16            TR0=1;
+  17            
+  18            EA=1;ET0=1;
+  19            while(1)
+  20            {
+  21            
+  22            }
+  23          }
+  24          
+  25          void time0(void) interrupt 1    //中断一
+  26          {
+  27            tt++;
+  28            if(tt==100)
+  29            {
+  30              tt=0;
+  31              P00=~P00;
+  32            }
+  33          }
+  34          */
+  35          //一到九正计时
+  36          //#include<STC15F2K60S2.H>
+  37          //unsigned char tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,0X90,0XBF,0XFF};
+  38          //unsigned char tt;
+  39          //unsigned char num=0;
+  40          //void Timer1Init(void);
+  41          //void main (void)
+  42          //{
+  43          //  P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+  44          //  P2=0XC0;P0=0X01;P2=0XFF;P0=0XFF;
+  45          //  Timer1Init();
+  46          //  EA=1;
+  47          //  ET1=1;
+  48          //  while(1);
+  49          //}
+  50          //void Timer1Init(void)   //5毫秒@11.0592MHz
+  51          //{
+  52          //  AUXR |= 0x40;   //定时器时钟1T模式
+  53          //  TMOD &= 0x0F;   //设置定时器模式
+  54          //  TL1 = 0x00;   //设置定时初值
+C51 COMPILER V9.60.0.0   TIME                                                              11/23/2022 16:58:20 PAGE 2   
+
+  55          //  TH1 = 0x28;   //设置定时初值
+  56          //  TF1 = 0;    //清除TF1标志
+  57          //  TR1 = 1;    //定时器1开始计时
+  58          //}
+  59          //void time0(void) interrupt 3    
+  60          //{
+  61          //  TL1 = 0x00;   //设置定时初值
+  62          //  TH1 = 0x28;   //设置定时初值
+  63          //  
+  64          //  tt++;
+  65          //  if(tt==200)
+  66          //  {
+  67          //    tt=0;
+  68          //    P0=tap[num];
+  69          //    num++;
+  70          //    if(num==9)
+  71          //    {
+  72          //      num=0;
+  73          //    }
+  74          //  }
+  75          //}
+  76          
+  77          /*#include<STC15F2K60S2.H>
+  78          
+  79          unsigned char LED=0;
+  80          unsigned char LED_RUN=0;
+  81          void Delayms (int ms);
+  82          
+  83          void main (void)
+  84          {
+  85            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+  86            
+  87            IT0=0;//外部中断
+  88            EX0=1;
+  89            EA=1;//总开关
+  90            while(1)
+  91            {
+  92            
+  93              if(LED_RUN==1)
+  94              {
+  95                P0=~(0X01<<LED);//0000 0001 0000 0010
+  96                LED++;
+  97                if(LED==8)LED=0;
+  98                Delayms(1000);
+  99              } 
+ 100            }
+ 101          }
+ 102          //  void Key_Scan (void)
+ 103          //  {
+ 104          //    if(P32==0)
+ 105          //    {
+ 106          //      Delayms(5);
+ 107          //      if(P32==0)
+ 108          //    { 
+ 109          //      if(LED_RUN=0)LED_RUN=1;
+ 110          //      else LED_RUN=0;
+ 111          //    }
+ 112          //    while(!P32);
+ 113          //    }
+ 114          //  }
+ 115          void Delayms (int ms)
+ 116          {
+C51 COMPILER V9.60.0.0   TIME                                                              11/23/2022 16:58:20 PAGE 3   
+
+ 117            int i,j;
+ 118            for(i=0;i<ms;i++)
+ 119              for(j=845;j>0;j--);
+ 120          }
+ 121          void exint0() interrupt 0//中断内容；内容要简洁
+ 122          {
+ 123            if(P33==1)//S5按键
+ 124            {
+ 125              if(LED_RUN==0)LED_RUN=1;
+ 126              else LED_RUN=0;
+ 127            }
+ 128          
+ 129          }
+ 130          */
+ 131          //定时器实现秒表功能
+ 132          /*#include<STC15F2K60S2.H>
+ 133          unsigned char code SMG_NoDot[18]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,0X88,0X80,0XC6,0XC0,0X
+             -86,0X8E,0XBF,0X7F};
+ 134          void Delayms (int ms);
+ 135          sbit S4=P3^3;
+ 136          sbit S5=P3^2;
+ 137          unsigned char t_m=0;
+ 138          unsigned char t_s=0;
+ 139          unsigned char t_005s=0;
+ 140          void SelectHC573(unsigned char channel)
+ 141          {
+ 142            switch(channel)
+ 143            {
+ 144              case 4:P2=(P2&0X1F)|0X80;break;
+ 145              case 5:P2=(P2&0X1F)|0XA0;break;
+ 146              case 6:P2=(P2&0X1F)|0XC0;break;
+ 147              case 7:P2=(P2&0X1F)|0XE0;break;
+ 148            } 
+ 149          }
+ 150          void DisplaySMG_Bit(unsigned char value,unsigned char pos)
+ 151          {
+ 152            SelectHC573(6);
+ 153            P0=0X01<<pos;
+ 154            SelectHC573(7);
+ 155            P0=value;
+ 156          }
+ 157          void DisplayTime()
+ 158          {
+ 159            DisplaySMG_Bit(SMG_NoDot[t_005s%10],7);
+ 160            Delayms(1);
+ 161            DisplaySMG_Bit(SMG_NoDot[t_005s/10],6);
+ 162            Delayms(1);
+ 163            DisplaySMG_Bit(SMG_NoDot[16],5);
+ 164            Delayms(1);
+ 165            
+ 166            DisplaySMG_Bit(SMG_NoDot[t_s%10],4);
+ 167            Delayms(1);
+ 168            DisplaySMG_Bit(SMG_NoDot[t_s/10],3);
+ 169            Delayms(1);
+ 170            DisplaySMG_Bit(SMG_NoDot[16],2);
+ 171            Delayms(1);
+ 172            
+ 173            DisplaySMG_Bit(SMG_NoDot[t_m%10],1);
+ 174            Delayms(1);
+ 175            DisplaySMG_Bit(SMG_NoDot[t_m/10],0);
+ 176            Delayms(1);
+ 177          }
+C51 COMPILER V9.60.0.0   TIME                                                              11/23/2022 16:58:20 PAGE 4   
+
+ 178          void InitTimer0()
+ 179          {
+ 180            TMOD=0X01;
+ 181            TH0=(65535-50000)/256;
+ 182            TL0=(65535-50000)%256;
+ 183            
+ 184            ET0=1;
+ 185            EA=1;
+ 186            TR0=1;
+ 187          }
+ 188          void ServiceTimer0() interrupt 1
+ 189          {
+ 190            TH0=(65535-50000)/256;
+ 191            TL0=(65535-50000)%256;
+ 192            
+ 193            t_005s++;
+ 194            if(t_005s==20)
+ 195            {
+ 196              t_s++;
+ 197              t_005s=0;
+ 198              if(t_s==60)
+ 199              {
+ 200                t_m++;
+ 201                t_s=0;
+ 202              }
+ 203              if(t_m==99)
+ 204              {
+ 205                t_m=0;
+ 206              }
+ 207            }
+ 208            
+ 209          }
+ 210          void ScanKeys()
+ 211          {
+ 212            if(S4==0)//秒表启动和暂停
+ 213            {
+ 214              Delayms(5);
+ 215              if(S4==0)
+ 216              {
+ 217                TR0=~TR0;
+ 218                while(S4==0)
+ 219                {
+ 220                  DisplayTime();
+ 221                }
+ 222              }
+ 223            }
+ 224            
+ 225            if(S5==0)//秒表清零
+ 226            {
+ 227              Delayms(5);
+ 228              if(S5==0)
+ 229              {
+ 230                t_s=0;
+ 231                t_005s=0;
+ 232                t_m=0;
+ 233                while(S5==0)
+ 234                {
+ 235                  DisplayTime();
+ 236                }
+ 237              }
+ 238            }
+ 239          }
+C51 COMPILER V9.60.0.0   TIME                                                              11/23/2022 16:58:20 PAGE 5   
+
+ 240          void Delayms (int ms)
+ 241          {
+ 242            int i,j;
+ 243            for(i=0;i<ms;i++)
+ 244              for(j=845;j>0;j--);
+ 245          }
+ 246          void main ()
+ 247          {
+ 248            InitTimer0();
+ 249            while(1)
+ 250            {
+ 251              DisplayTime();
+ 252              ScanKeys();
+ 253            }
+ 254          }
+ 255          */
+ 256          /*#include<STC15F2K60S2.H>
+ 257          
+ 258          unsigned char tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,0X88,0X80,0XC6,0XC0,0X86,0X8E};
+ 259          unsigned char LED=0;
+ 260          unsigned char LED_RUN=0;
+ 261          unsigned char yi;
+ 262          unsigned char num;
+ 263          void Display(yi);
+ 264          void Delayms (int ms);
+ 265          
+ 266          void main (void)
+ 267          {
+ 268            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 269            
+ 270            EA=1;//总开关
+ 271            EX0=1;
+ 272            IT0=1;//外部中断下降沿触发
+ 273            while(1)
+ 274            {
+ 275              yi=num;
+ 276              if(LED_RUN==1)
+ 277              {
+ 278                num++;
+ 279                Delayms(1000);
+ 280                if(num==16)
+ 281                {
+ 282                  num=0;
+ 283                }
+ 284              }
+ 285              Display(yi);
+ 286            }
+ 287          }
+ 288          
+ 289          void Display(yi)
+ 290          {
+ 291            P2=0XC0;
+ 292            P0=0X01;
+ 293            P2=0XFF;
+ 294            P0=tap[yi];
+ 295            Delayms(1);
+ 296          }
+ 297          void Delayms (int ms)
+ 298          {
+ 299            int i,j;
+ 300            for(i=0;i<ms;i++)
+ 301              for(j=845;j>0;j--);
+C51 COMPILER V9.60.0.0   TIME                                                              11/23/2022 16:58:20 PAGE 6   
+
+ 302          }
+ 303          void exint0() interrupt 0//中断内容；内容要简洁
+ 304          {
+ 305            if(P33==1)//S5按键
+ 306            {
+ 307              if(LED_RUN==0)LED_RUN=1;
+ 308              else LED_RUN=0;
+ 309            }
+ 310          }
+ 311          */
+ 312          
+ 313          
+ 314          
+ 315          
+ 316          
+ 317          
+ 318          
+ 319          
+ 320          
+ 321          
+ 322          
+ 323          
+ 324          
+ 325          
+ 326          
+ 327          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

@@ -1,0 +1,272 @@
+C51 COMPILER V9.59.0.0   EEPROM                                                            08/29/2021 23:12:13 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE EEPROM
+OBJECT MODULE PLACED IN .\Objects\EEPROM.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE EEPROM.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\EE
+                    -PROM.lst) TABS(2) OBJECT(.\Objects\EEPROM.obj)
+
+line level    source
+
+   1          /*#include<STC15F2K60S2.H>
+   2          #include<INTRINS.H>
+   3          
+   4          #define uchar unsigned char
+   5          #define uint unsigned char
+   6          sbit SDA=P2^1;
+   7          sbit SCL=P2^0;
+   8          uchar AD;
+   9          uchar tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,0XBF,0XFF};
+  10          uchar yi,er,san,si,wu,liu,qi,ba;
+  11          
+  12          void Display1(yi,er);
+  13          void Display2(san,si);
+  14          void Display3(wu,liu);
+  15          void Display4(qi,ba);
+  16          
+  17          void Allinit (void);
+  18          void Delayms(int ms);
+  19          uchar num;
+  20          void Delay6us ();
+  21          void IIC_Delay(unsigned char i);
+  22          unsigned char AD_Read(unsigned char add);
+  23          void AD_Write(unsigned char dat);
+  24          
+  25          
+  26          void main(void)
+  27          {
+  28            Allinit();
+  29            yi=11;er=11;san=11;si=11;wu=11;liu=11;qi=11;ba=11;
+  30            while(1)
+  31            {
+  32              AD=AD_Read(0X01);
+  33              
+  34              yi=AD/100;er=AD%100/10;san=AD%10;
+  35              Display1(yi,er);
+  36              Display2(san,si);
+  37              Display3(wu,liu);
+  38              Display4(qi,ba);
+  39              
+  40            }
+  41          }
+  42          void IIC_Delay(unsigned char i)
+  43          {
+  44              do{_nop_();}
+  45              while(i--);        
+  46          }
+  47          void IIC_Start()//开始条件
+  48          {
+  49            SDA=1;//数据线
+  50            SCL=1;//时针线
+  51            Delay6us();
+  52            SDA=0;
+  53            Delay6us();
+  54            SCL=0;
+C51 COMPILER V9.59.0.0   EEPROM                                                            08/29/2021 23:12:13 PAGE 2   
+
+  55          }
+  56          void IIC_Stop()
+  57          {
+  58            SDA=0;//由高到低
+  59            SCL=1;
+  60            Delay6us();
+  61            SDA=1;
+  62          }
+  63          
+  64          void IIC_SendByte(unsigned char dat)//数据有高位往低位传输
+  65          {
+  66            unsigned char i;
+  67            for(i=0;i<8;i++)
+  68            {
+  69              if(dat&0X80)SDA=1;
+  70              else SDA=0;
+  71              Delay6us();//保持稳定状态
+  72              SCL=1;
+  73              dat<<=1;
+  74              Delay6us();
+  75              SCL=0;
+  76            }
+  77          }
+  78          //发送应答
+  79          void IIC_SendAck(bit ackbit)
+  80          {
+  81              SCL = 0;
+  82              SDA = ackbit;           // 0：应答，1：非应答
+  83              IIC_Delay(5);
+  84              SCL = 1;
+  85              IIC_Delay(5);
+  86              SCL = 0; 
+  87              SDA = 1;
+  88              IIC_Delay(5);
+  89          }
+  90          bit IIC_WaitAck(void)
+  91          {
+  92            SDA=1;
+  93            Delay6us();
+  94            SCL=1;
+  95            Delay6us();
+  96            if(SDA)//SDA=1;信号传输失败；停止。
+  97            {
+  98              SCL=0;
+  99              IIC_Stop();
+ 100              return 0;
+ 101            }
+ 102            else
+ 103            {
+ 104              SCL=0;
+ 105              return 1;
+ 106            }
+ 107          }
+ 108          unsigned char IIC_RecByte(void)
+ 109          {
+ 110            unsigned char i;
+ 111            unsigned char dat;
+ 112            for(i=0;i<8;i++)
+ 113            {
+ 114              SCL=1;
+ 115              Delay6us();
+ 116              dat<<=1;
+C51 COMPILER V9.59.0.0   EEPROM                                                            08/29/2021 23:12:13 PAGE 3   
+
+ 117              if(SDA)dat|=0X01;
+ 118              
+ 119              SCL=0;
+ 120              Delay6us();
+ 121            }
+ 122            return dat;
+ 123          }
+ 124          void Write_24C02(unsigned char addr, unsigned char dat)
+ 125          {
+ 126            IIC_Start();    //IIC总线起始信号         
+ 127            IIC_SendByte(0xa0);   //24C02的写设备地址
+ 128            IIC_WaitAck();    //等待从机应答  
+ 129            IIC_SendByte(addr);   //内存字节字节
+ 130            IIC_WaitAck();    //等待从机应答  
+ 131            IIC_SendByte(dat);  //写入目标数据
+ 132            IIC_WaitAck();    //等待从机应答  
+ 133            IIC_Stop();   //IIC总线停止信号   
+ 134          }
+ 135          
+ 136          unsigned char Read_24C02(unsigned char addr)
+ 137          {
+ 138            unsigned char temp;
+ 139            //进行一个伪写操作
+ 140            IIC_Start();    //IIC总线起始信号         
+ 141            IIC_SendByte(0xa0);   //24C02写设备地址
+ 142            IIC_WaitAck();    //等待从机应答  
+ 143            IIC_SendByte(addr);   //内存自己地址
+ 144            IIC_WaitAck();    //等待从机应答  
+ 145            IIC_Stop();                   
+ 146            //进行字节读操作
+ 147            IIC_Start();    //IIC总线起始信号         
+ 148            IIC_SendByte(0xa1);   //24C02读设备地址
+ 149            IIC_WaitAck();    //等待从机应答  
+ 150            temp = IIC_RecByte(); //读取目标数据
+ 151            IIC_SendAck(0);     //产生非应答信号    
+ 152            IIC_Stop();   //IIC总线停止信号     
+ 153            return temp;
+ 154          }
+ 155          void Display1(yi,er)//数码管
+ 156          {
+ 157            P2=0XC0;
+ 158            P0=0X01;//0000 0001
+ 159            P2=0XE0;
+ 160            P0=tap[yi];
+ 161            Delayms(1);
+ 162            
+ 163            P2=0XC0;
+ 164            P0=0X02;
+ 165            P2=0XE0;
+ 166            P0=tap[er];
+ 167            Delayms(1);
+ 168          }
+ 169          void Display2(san,si)
+ 170          {
+ 171            P2=0XC0;
+ 172            P0=0X04;
+ 173            P2=0XE0;
+ 174            P0=tap[san];
+ 175            Delayms(1);
+ 176            
+ 177            P2=0XC0;
+ 178            P0=0X08;
+C51 COMPILER V9.59.0.0   EEPROM                                                            08/29/2021 23:12:13 PAGE 4   
+
+ 179            P2=0XE0;
+ 180            P0=tap[si];
+ 181            Delayms(1);
+ 182          }
+ 183          void Display3(wu,liu)
+ 184          {
+ 185            P2=0XC0;
+ 186            P0=0X10;
+ 187            P2=0XE0;
+ 188            P0=tap[wu];
+ 189            Delayms(1);
+ 190            
+ 191            P2=0XC0;
+ 192            P0=0X20;
+ 193            P2=0XE0;
+ 194            P0=tap[liu];
+ 195            Delayms(1);
+ 196          }
+ 197          void Display4(qi,ba)
+ 198          {
+ 199            P2=0XC0;
+ 200            P0=0X40;//0100 0000
+ 201            P2=0XE0;
+ 202            P0=tap[qi];
+ 203            Delayms(1);
+ 204            
+ 205            P2=0XC0;
+ 206            P0=0X80;
+ 207            P2=0XE0;
+ 208            P0=tap[ba];
+ 209            Delayms(1);
+ 210          }
+ 211          void Allinit(void)
+ 212          {
+ 213            P2=0XA0;//打开控制蜂鸣器的573
+ 214            P0=0X00;//关闭蜂鸣器继电器
+ 215            
+ 216            P2=0XC0;//打开控制数码管的位选573
+ 217            P0=0XFF;//选中所有的数码管
+ 218            P2=0XE0;//打开控制数码管段选573
+ 219            P0=0XFF;//关闭所有数码管
+ 220            
+ 221            P2=0X80;//打开控制LED灯的573
+ 222            P0=0XFF;//关闭所有LED灯
+ 223          }
+ 224          
+ 225          
+ 226          
+ 227          void Delayms (int ms)
+ 228          {
+ 229            int i,j;
+ 230            for(i=0;i<ms;i++)
+ 231              for(j=845;j>0;j--);
+ 232          }
+ 233          void Delay6us()   //@11.0592MHz
+ 234          {
+ 235            unsigned char i;
+ 236          
+ 237            i = 14;
+ 238            while (--i);
+ 239          }
+ 240          */
+C51 COMPILER V9.59.0.0   EEPROM                                                            08/29/2021 23:12:13 PAGE 5   
+
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   ----    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

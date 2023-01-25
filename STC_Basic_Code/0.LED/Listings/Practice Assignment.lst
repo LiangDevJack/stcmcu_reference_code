@@ -1,0 +1,222 @@
+C51 COMPILER V9.60.0.0   PRACTICE_ASSIGNMENT                                               01/23/2022 16:30:32 PAGE 1   
+
+
+C51 COMPILER V9.60.0.0, COMPILATION OF MODULE PRACTICE_ASSIGNMENT
+OBJECT MODULE PLACED IN .\Objects\Practice Assignment.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE Practice Assignment.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(
+                    -.\Listings\Practice Assignment.lst) TABS(2) OBJECT(.\Objects\Practice Assignment.obj)
+
+line level    source
+
+   1          //实践一
+   2          /*#include<STC15F2K60S2.H>
+   3          
+   4          
+   5          void Delayms (int ms);
+   6          void main (void)
+   7          {
+   8            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+   9            while(1)
+  10            {
+  11              P0=0XFE;
+  12              Delayms(200);
+  13              P0=0XFF;
+  14              Delayms(200);
+  15            }
+  16          }
+  17          void Delayms (int ms)
+  18          {
+  19            int i,j;
+  20            for(i=0;i<ms;i++)
+  21              for(j=845;j>0;j--);
+  22          }*/
+  23          //实践二
+  24          /*#include<STC15F2K60S2.H>
+  25          unsigned char LED;
+  26          void Delayms (int ms);
+  27          void main (void)
+  28          {
+  29            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+  30            while(1)
+  31            {
+  32              for(LED=0;LED<8;LED++)
+  33              {
+  34                P0=~(0X01<<LED);
+  35                Delayms(500);
+  36                P0=~(0X00<<LED);
+  37                Delayms(500);
+  38                Delayms(1000);
+  39              }
+  40            }
+  41          }
+  42          void Delayms (int ms)
+  43          {
+  44            int i,j;
+  45            for(i=0;i<ms;i++)
+  46              for(j=845;j>0;j--);
+  47          }*/
+  48          //实践三
+  49          #include<STC15F2K60S2.H>
+  50          unsigned char LED1,LED2,LED3;
+  51          void Delayms (int ms);
+  52          void main (void)
+  53          {
+  54   1        P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+C51 COMPILER V9.60.0.0   PRACTICE_ASSIGNMENT                                               01/23/2022 16:30:32 PAGE 2   
+
+  55   1        while(1)
+  56   1        {
+  57   2          for(LED1=0;LED1<8;LED1++)
+  58   2          {
+  59   3            P0=~(0X01<<LED1);
+  60   3            Delayms(200);
+  61   3          } 
+  62   2          for(LED2=0;LED2<8;LED2++)
+  63   2          {
+  64   3            P0=~(0X80>>LED2);//变量放后面
+  65   3            Delayms(200);
+  66   3          }
+  67   2          for(LED3=0;LED3<5;LED3++)
+  68   2          {
+  69   3            P0=0XFF;
+  70   3            Delayms(300);
+  71   3            P0=0X00;
+  72   3            Delayms(300);
+  73   3          }
+  74   2        }
+  75   1      
+  76   1      } 
+  77          void Delayms (int ms)
+  78          {
+  79   1        int i,j;
+  80   1        for(i=0;i<ms;i++)
+  81   1          for(j=845;j>0;j--);
+  82   1      }
+  83          
+  84          //实践四
+  85          /*#include<STC15F2K60S2.H>
+  86          unsigned char LED;
+  87          void Delayms (int ms);
+  88          void main (void)
+  89          {
+  90            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+  91            while(1)
+  92            {
+  93              for(LED=0;LED<8;LED++)
+  94              {
+  95                P0=0XFE<<LED;
+  96                Delayms(300);
+  97              } 
+  98            }
+  99          }
+ 100          void Delayms (int ms)
+ 101          {
+ 102            int i,j;
+ 103            for(i=0;i<ms;i++)
+ 104              for(j=845;j>0;j--);
+ 105          }
+ 106          */
+ 107          //实践五
+ 108          /*#include<STC15F2K60S2.H>
+ 109          unsigned char LED0,LED1,LED2,LED3,LED4,LED5,LED6;
+ 110          void Delayms (int ms);
+ 111          void main (void)
+ 112          {
+ 113            P2=0XA0;P0=0X00;P2=0X80;P0=0XFF;
+ 114            
+ 115            
+ 116            for(LED0=0;LED0<3;LED0++)
+C51 COMPILER V9.60.0.0   PRACTICE_ASSIGNMENT                                               01/23/2022 16:30:32 PAGE 3   
+
+ 117            {
+ 118                P0=0X55;//0101 0101
+ 119                Delayms(300);
+ 120                P0=0XAA;//1010 1010
+ 121                Delayms(300);
+ 122            }
+ 123            for(LED4=0;LED4<3;LED4++)
+ 124            {
+ 125                for(LED1=0;LED1<8;LED1++)
+ 126                {
+ 127                  P0=~(0X01<<LED1);
+ 128                  Delayms(200);
+ 129                } 
+ 130                for(LED2=0;LED2<8;LED2++)
+ 131                {
+ 132                  P0=~(0X80>>LED2);//变量放后面
+ 133                  Delayms(200);
+ 134                }
+ 135            }
+ 136          //  for(LED3=0;LED3<4;LED3++)
+ 137          //  {
+ 138          //    P0=0XE7;
+ 139          //    Delayms(200);
+ 140          //    P0=0XDB;
+ 141          //    Delayms(200);
+ 142          //    P0=0XBD;
+ 143          //    Delayms(200);
+ 144          //    P0=0X7E;
+ 145          //    Delayms(200);
+ 146          //  }
+ 147              for(LED3=0;LED3<4;LED3++)//不懂
+ 148              {
+ 149              
+ 150                P0=~((0X08>>LED3)|(0X10<<LED3));
+ 151                
+ 152                //P0=~(0X10<<LED3);
+ 153                //0000 1000
+ 154                
+ 155              
+ 156                Delayms(300);
+ 157              }
+ 158          //  for(LED3=0;LED3<4;LED3++)
+ 159          //  {
+ 160          //    for(LED5=0;LED5<1;LED5++)
+ 161          //    {
+ 162          //      P0=~(0X10<<LED3);
+ 163          //    }
+ 164          //    for(LED6=0;LED6<1;LED6++)
+ 165          //    {
+ 166          //      P0=~(0X08>>LED3);
+ 167          //    }
+ 168          //    Delayms(300);
+ 169          //  }
+ 170              P0=0XFF;
+ 171            while(1);
+ 172          }
+ 173          void Delayms (int ms)
+ 174          {
+ 175            int i,j;
+ 176            for(i=0;i<ms;i++)
+ 177              for(j=845;j>0;j--);
+ 178          }
+C51 COMPILER V9.60.0.0   PRACTICE_ASSIGNMENT                                               01/23/2022 16:30:32 PAGE 4   
+
+ 179          */
+ 180          
+ 181          
+ 182          
+ 183          
+ 184          
+ 185          
+ 186          
+ 187          
+ 188          
+ 189          
+ 190          
+ 191          
+ 192          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    162    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      3    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
