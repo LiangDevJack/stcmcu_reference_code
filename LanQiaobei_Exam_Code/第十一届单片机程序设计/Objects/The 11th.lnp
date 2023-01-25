@@ -1,0 +1,3 @@
+".\Objects\main.obj" 
+TO ".\Objects\The 11th" 
+PRINT(".\Listings\The 11th.m51") RAMSIZE(256) 

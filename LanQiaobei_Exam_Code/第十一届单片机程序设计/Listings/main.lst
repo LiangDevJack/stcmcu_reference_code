@@ -1,0 +1,505 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              12/02/2021 20:25:18 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<STC15F2K60S2.H>
+   2          #include<INTRINS.H>
+   3          sbit DQ=P1^4;
+   4          sbit SDA=P2^1;
+   5          sbit SCL=P2^0;
+   6          void Delayms(int ms);
+   7          void Allinit(void);
+   8          unsigned char tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,0XBF,0XFF,0XC6,0X8C};
+   9          unsigned char yi,er,san,si,wu,liu,qi,ba;
+  10          unsigned char wendu;
+  11          unsigned char model=0;
+  12          unsigned char shift=0;
+  13          
+  14          unsigned char T_max,T_min;
+  15          void Display1(yi,er);
+  16          void Display2(san,si);
+  17          void Display3(wu,liu);
+  18          void Display4(qi,ba);
+  19          void DS18B20_WriteByte(unsigned char dat);
+  20          void Init_DS18B20(void);
+  21          void Scanf_Key(void);
+  22          void Select_Model();
+  23          void Select_Shift(unsigned char shift);
+  24          void Model_0(void);
+  25          unsigned char DAC_Output(unsigned char V_out);
+  26          unsigned char V_out;
+  27          void LED_Indicator ();
+  28          void DAC_Output_If();
+  29          void Delay6us();
+  30          void Delay80us();
+  31          void Delay500us();
+  32          unsigned char Read_Temperature(void);
+  33          void main(void)
+  34          {
+  35   1        Allinit();
+  36   1        yi=11;er=11;san=11;si=11;wu=11;liu=11;qi=11;ba=11;
+  37   1        Init_DS18B20();
+  38   1        DS18B20_WriteByte(0XCC);
+  39   1        DS18B20_WriteByte(0X44);
+  40   1        T_min=20;T_max=30;
+  41   1        IT0=0;//外部中断
+  42   1        EX0=1;
+  43   1        EA=1;//总开关
+  44   1        while(1)
+  45   1        {
+  46   2          
+  47   2          
+  48   2          
+  49   2          wendu=Read_Temperature();
+  50   2          DAC_Output_If();
+  51   2          Scanf_Key();
+  52   2          
+  53   2          LED_Indicator ();
+  54   2          Select_Model();
+C51 COMPILER V9.59.0.0   MAIN                                                              12/02/2021 20:25:18 PAGE 2   
+
+  55   2          
+  56   2          Select_Shift(shift);
+  57   2          Display1(yi,er);
+  58   2          Display2(san,si);
+  59   2          Display3(wu,liu);
+  60   2          Display4(qi,ba);
+  61   2          DAC_Output(V_out);
+  62   2        }
+  63   1      }
+  64          void Model_0(void)//数据界面
+  65          {
+  66   1        yi=12;er=11;san=11;si=11;wu=11;liu=11;
+  67   1        qi=wendu/10;ba=wendu%10;
+  68   1        if(model==1)
+  69   1        {
+  70   2          si=T_max/10;wu=T_max%10;
+  71   2          qi=T_min/10;ba=T_min%10;
+  72   2        }
+  73   1      }
+  74          void Model_1(void)//参数界面
+  75          {
+  76   1        yi=13;er=11;san=11;si=T_max/10;wu=T_max%10;liu=11;
+  77   1        qi=T_min/10;ba=T_min%10;
+  78   1        
+  79   1      }
+  80          void Select_Model()
+  81          {
+  82   1        
+  83   1        if(model==0)
+  84   1        {
+  85   2          Model_0();
+  86   2        
+  87   2        }
+  88   1        else 
+  89   1        {
+  90   2          Model_1();
+  91   2        }
+  92   1      //  switch(model)
+  93   1      //  {
+  94   1      //    case 0:Model_0();break;
+  95   1      //    case 1:Model_1();break;
+  96   1      //  }
+  97   1      //  switch(shift)
+  98   1      //  {
+  99   1      //    case 0:si=T_max/10,wu=T_max%10;break;
+ 100   1      //    case 1:wu=T_min/10,wu=T_min%10;break;
+ 101   1      //  }
+ 102   1      }
+ 103          void Select_Shift(unsigned char shift)
+ 104          {
+ 105   1        if(shift==1)
+ 106   1        {
+ 107   2          qi=T_min/10;
+ 108   2          ba=T_min%10;
+ 109   2        }
+ 110   1        else if(shift==0)
+ 111   1        {
+ 112   2          si=T_max/10;
+ 113   2          wu=T_max%10;
+ 114   2          if(model==0)//避免model_0模式出现四五数码管留存现象
+ 115   2          {
+ 116   3            si=11;
+C51 COMPILER V9.59.0.0   MAIN                                                              12/02/2021 20:25:18 PAGE 3   
+
+ 117   3            wu=11;
+ 118   3          }
+ 119   2        }
+ 120   1      }
+ 121          
+ 122          
+ 123          //==============温度传感器===============
+ 124          void Init_DS18B20(void)
+ 125          {
+ 126   1        DQ=0;//拉低
+ 127   1        Delay500us();
+ 128   1        DQ=1;//拉高
+ 129   1        Delay500us();
+ 130   1      }
+ 131          void DS18B20_WriteByte(unsigned char dat)
+ 132          {
+ 133   1        unsigned char i;
+ 134   1        for(i=0;i<8;i++)
+ 135   1        {
+ 136   2          DQ=0;
+ 137   2          DQ=dat&0X01;
+ 138   2          Delay80us();
+ 139   2          DQ=1;
+ 140   2          dat>>=1;//从低位开始传输
+ 141   2        }
+ 142   1      }
+ 143          unsigned char DS18B20_ReadByte(void)
+ 144          {
+ 145   1        unsigned char i;
+ 146   1        unsigned char dat;
+ 147   1        
+ 148   1        for(i=0;i<8;i++)
+ 149   1        {
+ 150   2          DQ=0;
+ 151   2          dat >>=1;
+ 152   2          DQ=1;
+ 153   2          if(DQ==1)
+ 154   2          {
+ 155   3            dat=dat|0X80;
+ 156   3          }
+ 157   2          Delay80us();
+ 158   2        }
+ 159   1        return dat;
+ 160   1      }
+ 161          unsigned char Read_Temperature(void)
+ 162          {
+ 163   1        unsigned char low,hign;
+ 164   1        unsigned char temp;
+ 165   1        Init_DS18B20();
+ 166   1        DS18B20_WriteByte(0XCC);
+ 167   1        DS18B20_WriteByte(0X44);
+ 168   1        Delay500us();
+ 169   1        
+ 170   1        Init_DS18B20();
+ 171   1        DS18B20_WriteByte(0XCC);
+ 172   1        DS18B20_WriteByte(0XBE);
+ 173   1        
+ 174   1        low=DS18B20_ReadByte();
+ 175   1        hign=DS18B20_ReadByte();
+ 176   1      
+ 177   1        temp=hign<<4;
+ 178   1        temp=temp|(low>>4);
+C51 COMPILER V9.59.0.0   MAIN                                                              12/02/2021 20:25:18 PAGE 4   
+
+ 179   1        return temp;
+ 180   1      }
+ 181          //======================================
+ 182          void LED_Indicator () 
+ 183          {
+ 184   1          P2=0X80;
+ 185   1          P0=0XFF;
+ 186   1        if(T_max>T_min)
+ 187   1        {
+ 188   2          P00=0;
+ 189   2          if(wendu<=T_max)
+ 190   2          {
+ 191   3            P01=0;
+ 192   3            P00=1;
+ 193   3            if(wendu<T_min)
+ 194   3            {
+ 195   4              P02=0;
+ 196   4              P01=1;
+ 197   4            }
+ 198   3          }
+ 199   2        } 
+ 200   1        else
+ 201   1          {
+ 202   2            P03=0;
+ 203   2            P00=1;
+ 204   2            model=1;
+ 205   2          } 
+ 206   1      }
+ 207          void Scanf_Key(void)
+ 208          {
+ 209   1        
+ 210   1        if(P33==0)//S4按键 界面转换
+ 211   1        { 
+ 212   2          Delayms(5);
+ 213   2          if(P33==0)
+ 214   2          {
+ 215   3            model=~model;
+ 216   3          }
+ 217   2          while(!P33);
+ 218   2        }
+ 219   1        else if(P32==0)//S5按键 参数界面切换选择上下限温度
+ 220   1        { 
+ 221   2          Delayms(5);
+ 222   2          if(P32==0)
+ 223   2          {
+ 224   3            shift=~shift;
+ 225   3          }
+ 226   2          while(!P32);
+ 227   2        }
+ 228   1        else if(P31==0)//S6按键 加
+ 229   1        { 
+ 230   2          Delayms(5);
+ 231   2          if(P31==0)
+ 232   2          {
+ 233   3            if(shift==0)    //分割写，避免最高和最低温度一起改变
+ 234   3            {
+ 235   4              T_max++;
+ 236   4              if(T_max==100)
+ 237   4              {
+ 238   5                T_max=30;
+ 239   5              }
+ 240   4            } 
+C51 COMPILER V9.59.0.0   MAIN                                                              12/02/2021 20:25:18 PAGE 5   
+
+ 241   3            else //if(shift==0)不能加，影响下面程序的执行，qi,ba数码管示数不动，并列关系条件才行
+ 242   3            {
+ 243   4              T_min++;
+ 244   4              if(T_min==100)
+ 245   4              {
+ 246   5                T_min=20;
+ 247   5              }
+ 248   4            }
+ 249   3          
+ 250   3            
+ 251   3          }  
+ 252   2            while(!P31);
+ 253   2        }
+ 254   1        else if(P30==0)//S7按键 减
+ 255   1        { 
+ 256   2          Delayms(5);
+ 257   2          if(P30==0)
+ 258   2          {
+ 259   3            if(shift==0)    //分割写，避免最高和最低温度一起改变
+ 260   3            {
+ 261   4              T_max--;
+ 262   4              if(T_max==0)
+ 263   4              {
+ 264   5                T_max=30;
+ 265   5              }
+ 266   4            }
+ 267   3            else //而且写法顺序前后保持一致
+ 268   3            {
+ 269   4              T_min--;
+ 270   4              if(T_min==0)
+ 271   4              {
+ 272   5                T_min=20;
+ 273   5              }
+ 274   4            }
+ 275   3          }
+ 276   2          while(!P30);
+ 277   2        }
+ 278   1      } 
+ 279          void DAC_Output_If()
+ 280          {
+ 281   1        V_out=0XCB;//4V
+ 282   1        if(wendu<=T_max)
+ 283   1        {
+ 284   2          V_out=0X96;//3V
+ 285   2          if(wendu<T_min)
+ 286   2          {
+ 287   3            V_out=0X64;//2V
+ 288   3          }
+ 289   2        }
+ 290   1      }
+ 291          //==============D/A转换===============
+ 292          void IIC_Start()
+ 293          {
+ 294   1        SDA=1;
+ 295   1        SCL=1;
+ 296   1        Delay6us();
+ 297   1        SDA=0;
+ 298   1        Delay6us();
+ 299   1        SCL=0;
+ 300   1      }
+ 301          void IIC_Stop()
+ 302          {
+C51 COMPILER V9.59.0.0   MAIN                                                              12/02/2021 20:25:18 PAGE 6   
+
+ 303   1        SDA=0;
+ 304   1        SCL=1;
+ 305   1        Delay6us();
+ 306   1        SDA=1;
+ 307   1      }
+ 308          void IIC_Send_Byte(unsigned char dat)
+ 309          {
+ 310   1        unsigned char i;
+ 311   1        for(i=0;i<8;i++)
+ 312   1        {
+ 313   2          if(dat&0X80)SDA=1;
+ 314   2          else SDA=0;
+ 315   2          Delay6us();
+ 316   2          SCL=1;
+ 317   2          dat<<=1;
+ 318   2          Delay6us();
+ 319   2          SCL=0;
+ 320   2        }
+ 321   1      }
+ 322          bit IIC_Wait_Ack(void)
+ 323          {
+ 324   1        SDA=1;
+ 325   1        Delay6us();
+ 326   1        SCL=1;
+ 327   1        Delay6us();
+ 328   1        if(SDA)
+ 329   1        {
+ 330   2          SCL=0;
+ 331   2          IIC_Stop();
+ 332   2          return 0;
+ 333   2        }
+ 334   1        else
+ 335   1        {
+ 336   2          SCL=0;
+ 337   2          return 1;
+ 338   2        }
+ 339   1      }
+ 340          unsigned char DAC_Output(unsigned char V_out)
+ 341          {
+ 342   1        IIC_Start();
+ 343   1        IIC_Send_Byte(0X90);
+ 344   1        IIC_Wait_Ack();
+ 345   1        IIC_Send_Byte(0X40);
+ 346   1        IIC_Wait_Ack();
+ 347   1        IIC_Send_Byte(V_out);
+ 348   1        IIC_Wait_Ack();
+ 349   1        IIC_Stop();
+ 350   1        return(1);
+ 351   1      }
+ 352          //====================================
+ 353          
+ 354          
+ 355          void Display1(yi,er)
+ 356          {
+ 357   1        P2=0XC0;
+ 358   1        P0=0X01;
+ 359   1        P2=0XE0;
+ 360   1        P0=tap[yi];
+ 361   1        Delayms(1);
+ 362   1        
+ 363   1        P2=0XC0;
+ 364   1        P0=0X02;
+C51 COMPILER V9.59.0.0   MAIN                                                              12/02/2021 20:25:18 PAGE 7   
+
+ 365   1        P2=0XE0;
+ 366   1        P0=tap[er];
+ 367   1        Delayms(1);
+ 368   1      }
+ 369          void Display2(san,si)
+ 370          {
+ 371   1        P2=0XC0;
+ 372   1        P0=0X04;
+ 373   1        P2=0XE0;
+ 374   1        P0=tap[san];
+ 375   1        Delayms(1);
+ 376   1        
+ 377   1        P2=0XC0;
+ 378   1        P0=0X08;
+ 379   1        P2=0XE0;
+ 380   1        P0=tap[si];
+ 381   1        Delayms(1);
+ 382   1      }
+ 383          void Display3(wu,liu)
+ 384          {
+ 385   1        P2=0XC0;
+ 386   1        P0=0X10;
+ 387   1        P2=0XE0;
+ 388   1        P0=tap[wu];
+ 389   1        Delayms(1);
+ 390   1        
+ 391   1        P2=0XC0;
+ 392   1        P0=0X20;
+ 393   1        P2=0XE0;
+ 394   1        P0=tap[liu];
+ 395   1        Delayms(1);
+ 396   1      }
+ 397          void Display4(qi,ba)
+ 398          {
+ 399   1        P2=0XC0;
+ 400   1        P0=0X40;
+ 401   1        P2=0XE0;
+ 402   1        P0=tap[qi];
+ 403   1        Delayms(1);
+ 404   1        
+ 405   1        P2=0XC0;
+ 406   1        P0=0X80;
+ 407   1        P2=0XE0;
+ 408   1        P0=tap[ba];
+ 409   1        Delayms(1);
+ 410   1      }
+ 411          
+ 412          void Allinit(void)
+ 413          {
+ 414   1        P2=0XA0;//打开控制蜂鸣器的573
+ 415   1        P0=0X00;//关闭蜂鸣器继电器
+ 416   1        
+ 417   1        P2=0XC0;//打开控制数码管的位选573
+ 418   1        P0=0XFF;//选中所有的数码管
+ 419   1        P2=0XE0;//打开控制数码管段选573
+ 420   1        P0=0XFF;//关闭所有数码管
+ 421   1        
+ 422   1        P2=0X80;//打开控制LED灯的573
+ 423   1        P0=0XFF;//关闭所有LED灯
+ 424   1      }
+ 425          void Delay6us()   //@11.0592MHz
+ 426          {
+C51 COMPILER V9.59.0.0   MAIN                                                              12/02/2021 20:25:18 PAGE 8   
+
+ 427   1        unsigned char i;
+ 428   1      
+ 429   1        i = 14;
+ 430   1        while (--i);
+ 431   1      }
+ 432          
+ 433          void Delay80us()    //@11.0592MHz
+ 434          {
+ 435   1        unsigned char i, j;
+ 436   1      
+ 437   1        _nop_();
+ 438   1        i = 1;
+ 439   1        j = 217;
+ 440   1        do
+ 441   1        {
+ 442   2          while (--j);
+ 443   2        } while (--i);
+ 444   1      }
+ 445          void Delay500us()   //@11.0592MHz
+ 446          {
+ 447   1        unsigned char i, j;
+ 448   1      
+ 449   1        _nop_();
+ 450   1        _nop_();
+ 451   1        i = 6;
+ 452   1        j = 93;
+ 453   1        do
+ 454   1        {
+ 455   2          while (--j);
+ 456   2        } while (--i);
+ 457   1      }
+ 458          void Delayms(int ms)
+ 459          {
+ 460   1        int i,j;
+ 461   1        for(i=0;i<ms;i++)
+ 462   1          for(j=845;j>0;j--);
+ 463   1      }
+ 464          
+ 465          
+ 466          
+ 467          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1037    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     28      16
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

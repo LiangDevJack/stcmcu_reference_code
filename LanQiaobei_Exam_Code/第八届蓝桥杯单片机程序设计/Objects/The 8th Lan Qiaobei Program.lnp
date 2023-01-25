@@ -1,0 +1,4 @@
+".\Objects\main.obj",
+".\Objects\Test.obj" 
+TO ".\Objects\The 8th Lan Qiaobei Program" 
+PRINT(".\Listings\The 8th Lan Qiaobei Program.m51") RAMSIZE(256) 

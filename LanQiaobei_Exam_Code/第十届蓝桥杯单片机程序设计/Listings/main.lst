@@ -1,0 +1,475 @@
+C51 COMPILER V9.59.0.0   MAIN                                                              11/26/2021 19:18:15 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) TABS(2) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include<STC15F2K60S2.H>
+   2          #include<intrins.h>
+   3          sbit SDA=P2^1;
+   4          sbit SCL=P2^0;
+   5          
+   6          unsigned char tap[]={0XC0,0XF9,0XA4,0XB0,0X99,0X92,0X82,0XF8,0X80,0X90,\
+   7          0X40,0X79,0X24,0X30,0X19,0X12,0X02,0X78,0X00,0X10,0XBF,0XFF,0XC1,0X8E};
+   8          unsigned char AD;
+   9          unsigned char count_t=0;
+  10          unsigned int count_f=0;
+  11          unsigned int dat_f=0;
+  12          unsigned char yi,er,san,si,wu,liu,qi,ba;
+  13          unsigned char shift0=0;
+  14          unsigned char shift1=0;
+  15          unsigned char LED=0;
+  16          unsigned char Nixie_Tube=0;
+  17          
+  18          void Select_shift0(void);
+  19          void Select_shift1(void);
+  20          void SMGON_OFF(void);
+  21          void LED_Indicator(void);
+  22          void LED_Indicator_L4(void);
+  23          void Scan_Keys(void);
+  24          unsigned char AD_Read(unsigned char add);
+  25          void AD_Write(unsigned char V_Out);
+  26          void Init_Timer();
+  27          
+  28          void Allinit(void);
+  29          void display1(yi,er);
+  30          void display2(san,si);
+  31          void display3(wu,liu);
+  32          void display4(qi,ba);
+  33          void Delayms (int ms);
+  34          void Delay6us();
+  35          void main (void)
+  36          {
+  37   1        Allinit();
+  38   1        Init_Timer();
+  39   1        while(1)
+  40   1        {
+  41   2          Scan_Keys();
+  42   2          Select_shift0();
+  43   2          Select_shift1();
+  44   2          SMGON_OFF();  
+  45   2          LED_Indicator();
+  46   2          LED_Indicator_L4();
+  47   2        }
+  48   1      }
+  49          //===================模式切换====================
+  50          void Select_shift0(void)
+  51          {
+  52   1        switch(shift0)
+  53   1        {
+  54   2          case 0://电压界面
+C51 COMPILER V9.59.0.0   MAIN                                                              11/26/2021 19:18:15 PAGE 2   
+
+  55   2          {
+  56   3            AD=AD_Read(0X03);
+  57   3            yi=22;er=21;san=21;si=21;wu=21;
+  58   3            liu=AD/100+10;qi=AD%100/10;ba=AD%10;
+  59   3            if(LED==0)
+  60   3            {
+  61   4              P2=0X80;P0=0XFE;
+  62   4            }
+  63   3            
+  64   3            break;
+  65   3          }
+  66   2          case 1://频率界面
+  67   2          {
+  68   3            yi=23;er=21;san=21;si=21;wu=21;
+  69   3            if(dat_f>99)//被除数不能为零
+  70   3            {
+  71   4              liu=dat_f/100;
+  72   4            }
+  73   3            if(dat_f>9)
+  74   3            {
+  75   4              qi=dat_f%100/10;
+  76   4            }
+  77   3            ba=dat_f%10;
+  78   3            if(LED==0)
+  79   3            {
+  80   4              P2=0X80;P0=0XFD;  
+  81   4            }
+  82   3            break;
+  83   3          }
+  84   2        }
+  85   1      }
+  86          void Select_shift1(void)
+  87          {
+  88   1        switch(shift1)
+  89   1        {
+  90   2          case 1:
+  91   2          {
+  92   3            AD_Write(AD);
+  93   3            
+  94   3            break;
+  95   3          }
+  96   2          case 0:
+  97   2          {
+  98   3            AD_Write(0X64);
+  99   3            
+ 100   3            break;
+ 101   3          }
+ 102   2        }
+ 103   1      }
+ 104          
+ 105          //==================LED指示功能==================
+ 106          void LED_Indicator(void)
+ 107          {
+ 108   1        
+ 109   1        if(LED==0)
+ 110   1        {
+ 111   2          P2=0X80;
+ 112   2            if(AD<150)
+ 113   2           {
+ 114   3            P0=0XFF;
+ 115   3           }
+ 116   2            else if((AD>=150) &&(AD<250))
+C51 COMPILER V9.59.0.0   MAIN                                                              11/26/2021 19:18:15 PAGE 3   
+
+ 117   2           {
+ 118   3             P0=0XFB;
+ 119   3           }
+ 120   2             else if((AD>=250) &&(AD<350))
+ 121   2          {
+ 122   3          
+ 123   3            P0=0XFF;
+ 124   3          }
+ 125   2            else if(AD>=350)
+ 126   2          {
+ 127   3             P0=0XFB;
+ 128   3          }
+ 129   2        }
+ 130   1        else
+ 131   1        {
+ 132   2          P0=0XFF;
+ 133   2        }
+ 134   1        
+ 135   1      }
+ 136          void LED_Indicator_L4(void)
+ 137          {
+ 138   1        
+ 139   1        if(LED==0)
+ 140   1        {
+ 141   2          P2=0X80;
+ 142   2          if(dat_f<1000)
+ 143   2           {
+ 144   3            P0=0XFF;
+ 145   3           }
+ 146   2           else if((dat_f>=1000)&&(dat_f<5000))
+ 147   2           {
+ 148   3            P0=0XF7;
+ 149   3           }
+ 150   2           else if((dat_f>=5000)&&(dat_f<10000))
+ 151   2           {
+ 152   3            P0=0XFF;
+ 153   3           }
+ 154   2          else if(dat_f>=10000)
+ 155   2           {
+ 156   3            P0=0XF7;
+ 157   3            }
+ 158   2        }
+ 159   1          else
+ 160   1        {
+ 161   2          P0=0XFF;
+ 162   2        }
+ 163   1        
+ 164   1      }
+ 165          //==================数码管关/开==================
+ 166          void SMGON_OFF(void)
+ 167          {
+ 168   1        if(Nixie_Tube==0)
+ 169   1        {
+ 170   2          display1(yi,er);
+ 171   2          display2(san,si);
+ 172   2          display3(wu,liu);
+ 173   2          display4(qi,ba);
+ 174   2        }
+ 175   1        else
+ 176   1        {
+ 177   2          yi=21;er=21;san=21;si=21;wu=21;liu=21;qi=21;ba=21;
+ 178   2          display4(qi,ba);
+C51 COMPILER V9.59.0.0   MAIN                                                              11/26/2021 19:18:15 PAGE 4   
+
+ 179   2        }
+ 180   1      }
+ 181          //===================独立按键====================
+ 182          void Scan_Keys(void)
+ 183          {
+ 184   1        if(P33==0)//显示界面切换
+ 185   1        {
+ 186   2          Delayms(5);
+ 187   2          if(P33==0)
+ 188   2          {
+ 189   3            shift0=!shift0;
+ 190   3          }
+ 191   2          while(!P33);
+ 192   2        }
+ 193   1        else if(P32==0)//输出模式切换
+ 194   1        {
+ 195   2          Delayms(5);
+ 196   2          if(P32==0)
+ 197   2          {
+ 198   3            shift1=!shift1;
+ 199   3          }
+ 200   2          while(!P32);
+ 201   2        }
+ 202   1        else if(P31==0)//LED指示灯功能控制
+ 203   1        {
+ 204   2          Delayms(5);
+ 205   2          if(P31==0)
+ 206   2          {
+ 207   3            LED=!LED;
+ 208   3          }
+ 209   2          while(!P31);
+ 210   2        }
+ 211   1        else if(P30==0)//数码管显示功能控制
+ 212   1        {
+ 213   2          Delayms(5);
+ 214   2          if(P30==0)
+ 215   2          {
+ 216   3            Nixie_Tube=!Nixie_Tube;
+ 217   3          }
+ 218   2          while(!P30);
+ 219   2        }
+ 220   1      }
+ 221          //===================PCF8591=====================
+ 222          void IIC_Start()
+ 223          {
+ 224   1        SDA=1;
+ 225   1        SCL=1;
+ 226   1        Delay6us();
+ 227   1        SDA=0;
+ 228   1        Delay6us();
+ 229   1        SCL=0;
+ 230   1      }
+ 231          void IIC_Stop()
+ 232          {
+ 233   1        SDA=0;
+ 234   1        SCL=1;
+ 235   1        Delay6us();
+ 236   1        SDA=1;
+ 237   1      }
+ 238          void IIC_SendByte(unsigned char dat)
+ 239          {
+ 240   1        unsigned char i;
+C51 COMPILER V9.59.0.0   MAIN                                                              11/26/2021 19:18:15 PAGE 5   
+
+ 241   1        for(i=0;i<8;i++)
+ 242   1        {
+ 243   2          if(dat&0X80)SDA=1;
+ 244   2          else SDA=0;
+ 245   2          Delay6us();
+ 246   2          SCL=1;
+ 247   2          dat<<=1;//传输从高位开始
+ 248   2          Delay6us();
+ 249   2          SCL=0;
+ 250   2        }
+ 251   1      }
+ 252          bit IIC_WaitAck(void)
+ 253          {
+ 254   1        SDA=1;
+ 255   1        Delay6us();
+ 256   1        SCL=1;
+ 257   1        Delay6us();
+ 258   1        if(SDA)
+ 259   1        {
+ 260   2          SCL=0;
+ 261   2          IIC_Stop();
+ 262   2          return 0;
+ 263   2        }
+ 264   1        else
+ 265   1        {
+ 266   2          SCL=0;
+ 267   2          return 1;
+ 268   2        }
+ 269   1      }
+ 270          unsigned char IIC_RecByte(void)
+ 271          {
+ 272   1        unsigned char i;
+ 273   1        unsigned char dat;
+ 274   1        for(i=0;i<8;i++)
+ 275   1        {
+ 276   2          SCL=1;
+ 277   2          Delay6us();
+ 278   2          dat<<=1;
+ 279   2          if(SDA)dat|=0X01;
+ 280   2          SCL=0;
+ 281   2          Delay6us();
+ 282   2        }
+ 283   1        return dat;
+ 284   1      }
+ 285          unsigned char AD_Read(unsigned char add)
+ 286          {
+ 287   1        unsigned char temp;
+ 288   1        IIC_Start();
+ 289   1        IIC_SendByte(0X90);
+ 290   1        IIC_WaitAck();
+ 291   1        IIC_SendByte(add);
+ 292   1        IIC_WaitAck();
+ 293   1        IIC_Stop();
+ 294   1        
+ 295   1        IIC_Start();
+ 296   1        IIC_SendByte(0X91);
+ 297   1        IIC_WaitAck();
+ 298   1        temp=IIC_RecByte();
+ 299   1        IIC_Stop();
+ 300   1      
+ 301   1        return temp;
+ 302   1      }
+C51 COMPILER V9.59.0.0   MAIN                                                              11/26/2021 19:18:15 PAGE 6   
+
+ 303          void AD_Write(unsigned char V_Out)
+ 304          {
+ 305   1        IIC_Start();
+ 306   1        IIC_SendByte(0X90);
+ 307   1        IIC_WaitAck();
+ 308   1        IIC_SendByte(0X40);//D/A转换指令
+ 309   1        IIC_WaitAck();
+ 310   1        IIC_SendByte(V_Out);//读模式128
+ 311   1        IIC_WaitAck();
+ 312   1        IIC_Stop();
+ 313   1      }
+ 314          //==================NE555频率====================
+ 315          void Init_Timer()
+ 316          {
+ 317   1        TH0 = 0xff;        
+ 318   1        TL0 = 0xff;
+ 319   1        
+ 320   1        TH1 = (65536 - 50000) / 256;        
+ 321   1        TL1 = (65536 - 50000) % 256;
+ 322   1        
+ 323   1        TMOD = 0x16;     //定时器1用方式1，定时；定时器0用方式2，计数
+ 324   1        
+ 325   1        ET0 = 1;
+ 326   1        ET1 = 1;
+ 327   1        EA = 1;
+ 328   1        
+ 329   1        TR0 = 1;
+ 330   1        TR1 = 1;
+ 331   1      }
+ 332           
+ 333          void Service_T0() interrupt 1
+ 334          {
+ 335   1        count_f++;
+ 336   1      }
+ 337           
+ 338          void Service_T1() interrupt 3
+ 339          {
+ 340   1        TH1 = (65536 - 50000) / 256;        
+ 341   1        TL1 = (65536 - 50000) % 256;
+ 342   1        count_t++;
+ 343   1        if(count_t == 20)
+ 344   1        {
+ 345   2          dat_f = count_f;
+ 346   2          count_f = 0;
+ 347   2          count_t = 0;
+ 348   2        }
+ 349   1      }
+ 350          //===============================================
+ 351          void Allinit(void)
+ 352          {
+ 353   1        P2=0XA0;
+ 354   1        P0=0X00;
+ 355   1        
+ 356   1        P2=0XC0;
+ 357   1        P0=0XFF;
+ 358   1        P2=0XFF;
+ 359   1        P0=0XFF;
+ 360   1        
+ 361   1        P2=0X80;
+ 362   1        P0=0XFF;
+ 363   1      }
+ 364          void display1(yi,er)
+C51 COMPILER V9.59.0.0   MAIN                                                              11/26/2021 19:18:15 PAGE 7   
+
+ 365          {
+ 366   1        P2=0XC0;
+ 367   1        P0=0X01;
+ 368   1        P2=0XFF;
+ 369   1        P0=tap[yi];
+ 370   1        Delayms(1);
+ 371   1        
+ 372   1        P2=0XC0;
+ 373   1        P0=0X02;
+ 374   1        P2=0XFF;
+ 375   1        P0=tap[er];
+ 376   1        Delayms(1);
+ 377   1      }
+ 378          void display2(san,si)
+ 379          {
+ 380   1        P2=0XC0;
+ 381   1        P0=0X04;
+ 382   1        P2=0XFF;
+ 383   1        P0=tap[san];
+ 384   1        Delayms(1);
+ 385   1        
+ 386   1        P2=0XC0;
+ 387   1        P0=0X08;
+ 388   1        P2=0XFF;
+ 389   1        P0=tap[si];
+ 390   1        Delayms(1);
+ 391   1      }
+ 392          void display3(wu,liu)
+ 393          {
+ 394   1        P2=0XC0;
+ 395   1        P0=0X10;
+ 396   1        P2=0XFF;
+ 397   1        P0=tap[wu];
+ 398   1        Delayms(1);
+ 399   1        
+ 400   1        P2=0XC0;
+ 401   1        P0=0X20;
+ 402   1        P2=0XFF;
+ 403   1        P0=tap[liu];
+ 404   1        Delayms(1);
+ 405   1      }
+ 406          void display4(qi,ba)
+ 407          {
+ 408   1        P2=0XC0;
+ 409   1        P0=0X40;
+ 410   1        P2=0XFF;
+ 411   1        P0=tap[qi];
+ 412   1        Delayms(1);
+ 413   1        
+ 414   1        P2=0XC0;
+ 415   1        P0=0X80;
+ 416   1        P2=0XFF;
+ 417   1        P0=tap[ba];
+ 418   1        Delayms(1);
+ 419   1      }
+ 420          void Delayms (int ms)
+ 421          {
+ 422   1        int i,j;
+ 423   1        for(i=0;i<ms;i++)
+ 424   1          for(j=845;j>0;j--);
+ 425   1      }
+ 426          void Delay6us()   //@11.0592MHz
+C51 COMPILER V9.59.0.0   MAIN                                                              11/26/2021 19:18:15 PAGE 8   
+
+ 427          {
+ 428   1        unsigned char i;
+ 429   1      
+ 430   1        i = 14;
+ 431   1        while (--i);
+ 432   1      }
+ 433          
+ 434          
+ 435          
+ 436          
+ 437          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1101    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     42      15
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
